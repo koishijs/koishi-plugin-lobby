@@ -1,0 +1,15 @@
+* text eol=lf
+
+# images
+*.png -text
+*.jpg -text
+*.ico -text
+*.gif -text
+*.webp -text
+
+# fonts
+*.woff -text
+*.woff2 -text
+*.ttf -text
+*.otf -text
+*.eot -text

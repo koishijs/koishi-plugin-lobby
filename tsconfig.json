@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.base",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "koishi-plugin-lobby": ["packages/core/src"],
+      "koishi-plugin-*": ["packages/*/src"],
+    },
+  },
+}

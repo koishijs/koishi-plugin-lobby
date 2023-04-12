@@ -1,5 +1,5 @@
-import { Logger } from 'koishi'
-import Player from './player'
+import { Logger, Random, SessionError } from 'koishi'
+import { Player } from './player'
 import Lobby from '.'
 
 const logger = new Logger('lobby')
@@ -10,9 +10,8 @@ export interface Message<T = any> {
 }
 
 export class Room {
-  static id = 0
-
-  id: number
+  id: string
+  name: string
   lobby: Lobby
   // game: Game = null
   players: Player[] = []
@@ -20,15 +19,15 @@ export class Room {
   messages: Message[] = []
 
   constructor(host: Player) {
-    this.id = ++Room.id
+    this.name = this.id = Random.id()
     this.lobby = host.lobby
     this.lobby.rooms[this.id] = this
     logger.debug(`${this} created`)
     this.join(host)
   }
 
-  getPlayer(playerId: string) {
-    return this.players.find(({ id }) => id === playerId)
+  getPlayer(id: string) {
+    return this.players.find(player => id === player.id)
   }
 
   validatePlayer(player: Player) {
@@ -39,9 +38,6 @@ export class Room {
     } else if (this.game) {
       return 'currently-gaming'
     }
-  }
-
-  update() {
   }
 
   private _join(player: Player) {
@@ -139,10 +135,10 @@ export class Room {
     }
   }
 
-  transfer(clientID: string) {
+  transfer(id: number) {
     const oldHost = this.players[0]
-    const index = this.players.findIndex(({ id }) => id === clientID)
-    if (index <= 0) return
+    const index = this.players.findIndex(player => id === player.id)
+    if (index <= 0) throw new SessionError('lobby.player-not-found', [id])
     const [host] = this.players.splice(index, 1)
     this.players.unshift(host)
     this.messages.push({

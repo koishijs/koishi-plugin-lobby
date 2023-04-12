@@ -1,0 +1,21 @@
+commands:
+  lobby:
+    description: 游戏大厅
+  lobby.create:
+    description: 创建房间
+    messages:
+      success: 房间创建成功，编号为 {id}。
+  lobby.join:
+    description: 加入房间
+    messages:
+      success: 加入房间成功！
+  lobby.leave:
+    description: 离开房间
+    messages:
+      success: 已离开房间。
+
+lobby:
+  already-in-room: 你已经在房间 {id} 中。
+  not-in-room: 你并没有在任何房间中。
+  room-not-found: 房间 {0} 不存在。
+  player-not-found: 用户 {0} 不存在。

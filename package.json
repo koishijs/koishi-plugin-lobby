@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "workspaces": [
+    "external/*",
     "packages/*"
   ],
   "packageManager": "yarn@1.22.19",
@@ -26,7 +27,7 @@
     "@koishijs/plugin-database-memory": "^2.3.4",
     "@koishijs/plugin-help": "^2.2.2",
     "@koishijs/plugin-mock": "^2.4.3",
-    "@koishijs/vitepress": "^1.7.5",
+    "@koishijs/vitepress": "^1.7.6",
     "@types/chai": "^4.3.4",
     "@types/chai-as-promised": "^7.1.5",
     "@types/mocha": "^9.1.1",

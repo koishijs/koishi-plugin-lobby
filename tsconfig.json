@@ -4,7 +4,10 @@
     "baseUrl": ".",
     "paths": {
       "koishi-plugin-lobby": ["packages/core/src"],
-      "koishi-plugin-*": ["packages/*/src"],
+      "koishi-plugin-*": [
+        "external/*/src",
+        "packages/*/src",
+      ],
     },
   },
 }

@@ -1,0 +1,54 @@
+{
+  "name": "koishi-plugin-lobby",
+  "description": "Lobby service for Koishi",
+  "version": "0.1.0",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "files": [
+    "lib",
+    "dist",
+    "index.html"
+  ],
+  "author": "Shigma <shigma10826@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/koishijs/koishi-plugin-lobby.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/koishijs/koishi-plugin-lobby/issues"
+  },
+  "homepage": "https://lobby.koishi.chat",
+  "koishi": {
+    "description": {
+      "en": "Lobby service",
+      "zh": "游戏大厅服务"
+    },
+    "service": {
+      "implements": [
+        "lobby"
+      ]
+    }
+  },
+  "keywords": [
+    "bot",
+    "chatbot",
+    "koishi",
+    "plugin",
+    "game",
+    "lobby",
+    "board",
+    "card",
+    "chess"
+  ],
+  "peerDependencies": {
+    "koishi": "^4.12.4"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.3",
+    "atsc": "^1.2.2",
+    "koishi": "^4.12.4",
+    "typescript": "^4.9.5"
+  }
+}

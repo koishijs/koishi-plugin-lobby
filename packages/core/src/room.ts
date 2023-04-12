@@ -17,7 +17,7 @@ export class Room {
   messages: Message[] = []
 
   constructor(public host: Player) {
-    this.name = this.id = Random.id()
+    this.name = this.id = Random.id(6, 10)
     this.lobby = host.lobby
     this.lobby.rooms[this.id] = this
     logger.debug(`${this} created`)
@@ -32,7 +32,7 @@ export class Room {
 
   getPlayer(id: number) {
     const player = this.players[id]
-    if (!player) throw new SessionError('lobby.player-not-found', [id])
+    if (!player) throw new SessionError('lobby.assert.player-not-found', [id])
     return player
   }
 
@@ -47,11 +47,11 @@ export class Room {
 
   leave(id: number, source?: Player) {
     const player = this.getPlayer(id)
-    player.room = null
     delete this.players[player.id]
+    delete this.lobby.players[player.id]
     logger.debug(`${player} left ${this}`)
 
-    if (!this.players.length) {
+    if (!Object.keys(this.players).length) {
       this.destroy()
       return
     }

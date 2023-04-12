@@ -1,4 +1,4 @@
-import { Command, Context, Dict, Schema, Service } from 'koishi'
+import { Context, Dict, Schema, Service, SessionError } from 'koishi'
 import { Game } from './game'
 import { Room } from './room'
 import { Player } from './player'
@@ -17,59 +17,66 @@ class Lobby extends Service {
   games: Game[]
   players: Dict<Player> = Object.create(null)
   rooms: Dict<Room> = Object.create(null)
-  cmd: Command
 
   constructor(ctx: Context, public config: Lobby.Config) {
     super(ctx, 'lobby', true)
-    this.cmd = ctx.private().command('lobby')
+    ctx.i18n.define('zh', require('./locales/zh-CN'))
 
-    this.cmd.subcommand('.create')
+    ctx.private().command('lobby')
+    const room = ctx.private().command('room')
+
+    room.subcommand('.create')
       .userFields(['id', 'name'])
       .action(({ session }) => {
-        let player = this.players[session.user.id]
-        if (player) return session.text('lobby.already-in-room', player.room)
-        player = new Player(session)
-        const room = new Room(player)
+        this.assertIdle(session.user.id)
+        const room = new Room(new Player(session))
         return session.text('.success', room)
       })
 
-    this.cmd.subcommand('.join <id:number>')
+    room.subcommand('.join <id:number>')
       .userFields(['id', 'name'])
       .action(({ session }, id) => {
-        const player = this.players[session.user.id]
-        if (player) return session.text('lobby.already-in-room', player.room)
+        this.assertIdle(session.user.id)
         const room = this.rooms[id]
-        if (!room) return session.text('lobby.room-not-found', [id])
-        room.join(player)
+        if (!room) return session.text('lobby.assert.room-not-found', [id])
+        room.join(new Player(session))
         return session.text('.success', room)
       })
 
-    this.cmd.subcommand('.leave')
+    room.subcommand('.leave')
       .userFields(['id', 'name'])
       .action(({ session }) => {
-        const player = this.players[session.user.id]
-        if (player) return session.text('lobby.not-in-room')
+        const player = this.assertBusy(session.user.id)
         player.room.leave(player.id)
         return session.text('.success')
       })
 
-    this.cmd.subcommand('.kick [id:number]')
+    room.subcommand('.kick [id:number]')
       .userFields(['id', 'name'])
       .action(({ session }, id) => {
-        const player = this.players[session.user.id]
-        if (player) return session.text('lobby.not-in-room')
+        const player = this.assertBusy(session.user.id)
         player.room.leave(id, player)
         return session.text('.success')
       })
 
-    this.cmd.subcommand('.transfer [id:number]')
+    room.subcommand('.transfer [id:number]')
       .userFields(['id', 'name'])
       .action(({ session }, id) => {
-        const player = this.players[session.user.id]
-        if (player) return session.text('lobby.not-in-room')
+        const player = this.assertBusy(session.user.id)
         player.room.transfer(id)
         return session.text('.success')
       })
+  }
+
+  assertIdle(id: number) {
+    const player = this.players[id]
+    if (player) throw new SessionError('lobby.assert.already-in-room', player.room)
+  }
+
+  assertBusy(id: number) {
+    const player = this.players[id]
+    if (!player) throw new SessionError('lobby.assert.not-in-room')
+    return player
   }
 
   register(game: Game) {
@@ -78,6 +85,8 @@ class Lobby extends Service {
 }
 
 namespace Lobby {
+  export const using = ['database']
+
   export interface Config {}
 
   export const Config: Schema<Config> = Schema.object({})

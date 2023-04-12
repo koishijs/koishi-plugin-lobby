@@ -18,6 +18,7 @@ export class Player {
     this.platform = session.platform
     this.userId = session.userId
     this.bot = session.bot
+    this.lobby.players[this.id] = this
   }
 
   toString() {

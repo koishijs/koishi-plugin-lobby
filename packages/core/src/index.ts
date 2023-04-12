@@ -49,7 +49,7 @@ class Lobby extends Service {
       .action(({ session }) => {
         const player = this.players[session.user.id]
         if (player) return session.text('lobby.not-in-room')
-        player.room.leave(player)
+        player.room.leave(player.id)
         return session.text('.success')
       })
 
@@ -58,7 +58,7 @@ class Lobby extends Service {
       .action(({ session }, id) => {
         const player = this.players[session.user.id]
         if (player) return session.text('lobby.not-in-room')
-        player.room.leave(id)
+        player.room.leave(id, player)
         return session.text('.success')
       })
 

@@ -19,3 +19,12 @@ lobby:
   not-in-room: 你并没有在任何房间中。
   room-not-found: 房间 {0} 不存在。
   player-not-found: 用户 {0} 不存在。
+  system:
+    join: '{target} 加入了房间。'
+    leave: '{target} 离开了房间。'
+    leave-transfer: '{source} 离开了房间，并将房主转移给了 {target}。'
+    transfer: '{source} 将房主转移给了 {target}。'
+    kick: '{source} 将 {target} 踢出了房间。'
+    start: 游戏开始了。
+    end: 游戏结束了。
+    terminated: 游戏因为异常而中止。

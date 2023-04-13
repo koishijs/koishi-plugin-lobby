@@ -26,7 +26,7 @@ class Lobby extends Service {
     const room = ctx.private().command('room')
 
     room.subcommand('.create')
-      .userFields(['id', 'name'])
+      .userFields(['id', 'name', 'locale'])
       .action(({ session }) => {
         this.assertIdle(session.user.id)
         const room = new Room(new Player(session))
@@ -34,13 +34,12 @@ class Lobby extends Service {
       })
 
     room.subcommand('.join <id:number>')
-      .userFields(['id', 'name'])
+      .userFields(['id', 'name', 'locale'])
       .action(({ session }, id) => {
         this.assertIdle(session.user.id)
         const room = this.rooms[id]
         if (!room) return session.text('lobby.assert.room-not-found', [id])
         room.join(new Player(session))
-        return session.text('.success', room)
       })
 
     room.subcommand('.leave')
@@ -56,7 +55,6 @@ class Lobby extends Service {
       .action(({ session }, id) => {
         const player = this.assertBusy(session.user.id)
         player.room.leave(id, player)
-        return session.text('.success')
       })
 
     room.subcommand('.transfer [id:number]')

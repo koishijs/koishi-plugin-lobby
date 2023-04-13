@@ -1,12 +1,12 @@
-import { Dict, Logger, Random, SessionError } from 'koishi'
+import { Dict, h, Logger, Random, SessionError } from 'koishi'
 import { Player } from './player'
 import Lobby from '.'
 
 const logger = new Logger('lobby')
 
-export interface Message<T = any> {
+export interface Message {
   type: string
-  param?: T
+  param?: any[]
 }
 
 export class Room {
@@ -21,12 +21,15 @@ export class Room {
     this.lobby = host.lobby
     this.lobby.rooms[this.id] = this
     logger.debug(`${this} created`)
-    this.join(host)
+    this._join(host)
   }
 
-  message(type: string, param = {}) {
+  message(type: string, param = []) {
     const message: Message = { type, param }
     this.messages.push(message)
+    for (const id in this.players) {
+      this.players[id].send(h('i18n', { path: 'lobby.' + type }, param))
+    }
     return message
   }
 
@@ -36,12 +39,14 @@ export class Room {
     return player
   }
 
-  join(player: Player) {
+  _join(player: Player) {
     player.room = this
     this.players[player.id] = player
-    this.message('system.join', {
-      target: player.name,
-    })
+  }
+
+  join(player: Player) {
+    this._join(player)
+    this.message('system.join', [player.name])
     logger.debug(`${player} joined ${this}`)
   }
 
@@ -57,14 +62,10 @@ export class Room {
     }
 
     if (source) {
-      this.message('system.kick', {
-        target: player.name,
-        source: source.name,
-      })
+      this.message('system.kick', [player.name, source.name])
+      player.send(h('i18n', { path: 'lobby.system.kick-self' }, [source.name]))
     } else {
-      this.message('system.leave', {
-        target: player.name,
-      })
+      this.message('system.leave', [player.name])
     }
   }
 
@@ -75,15 +76,9 @@ export class Room {
       oldHost.room = null
       delete this.players[oldHost.id]
       logger.debug(`${oldHost} left ${this}`)
-      this.message('system.leave-transfer', {
-        target: this.host.name,
-        source: oldHost.name,
-      })
+      this.message('system.leave-transfer', [this.host.name, oldHost.name])
     } else {
-      this.message('system.transfer', {
-        target: this.host.name,
-        source: oldHost.name,
-      })
+      this.message('system.transfer', [this.host.name, oldHost.name])
     }
   }
 
@@ -97,10 +92,7 @@ export class Room {
 
   chat(player: Player, content: string, type = 'player') {
     if (!content) return
-    this.message('chat.' + type, {
-      content,
-      source: player.name,
-    })
+    this.message('chat.' + type, [content, player.name])
   }
 
   toString() {

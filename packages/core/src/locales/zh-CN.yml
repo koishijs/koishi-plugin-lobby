@@ -13,12 +13,19 @@ commands:
       talk-prefix: 发送「{0}内容」可在房间内发言。
   room.create:
     description: 创建房间
+    options:
+      capacity: 最大人数
     messages:
       success: 房间创建成功，编号为 {id}。
+  room.config:
+    description: 修改房间设置
+    messages:
+      success: 设置修改成功！
   room.join:
     description: 加入房间
     messages:
       success: 加入房间成功！
+      full: 该房间人数已满，无法加入。
   room.leave:
     description: 离开房间
     messages:
@@ -45,7 +52,7 @@ commands:
 
 lobby:
   exception:
-    already-in-room: 你已在房间 {id} 中。
+    already-in-room: 你已在房间 {id} 中。输入「room leave」以离开当前房间。
     not-in-room: 你并不在任何房间中。
     room-not-found: 房间 {0} 不存在。
     player-not-found: 房间中没有编号为 {0} 的玩家。

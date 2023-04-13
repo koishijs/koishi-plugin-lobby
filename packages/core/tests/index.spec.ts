@@ -37,8 +37,8 @@ after(async () => {
 describe('koishi-plugin-lobby', () => {
   it('basic usage', async () => {
     id.mockReturnValueOnce('114514')
-    await client1.shouldReply('room create', '房间创建成功，编号为 114514。')
-    await client1.shouldReply('room create', '你已在房间 114514 中。')
+    await client1.shouldReply('room create -c 2', '房间创建成功，编号为 114514。')
+    await client1.shouldReply('room create', '你已在房间 114514 中。输入「room leave」以离开当前房间。')
     await client1.shouldReply('room', [
       '房号：114514',
       '房主：111',
@@ -60,10 +60,12 @@ describe('koishi-plugin-lobby', () => {
       '发送「:内容」可在房间内发言。',
     ].join('\n'))
 
+    await client3.shouldReply('room join 114514', '该房间人数已满，无法加入。')
+    await client1.shouldReply('room config -c 3', '设置修改成功！')
     await client3.shouldNotReply('room join 114514')
     expect(send.mock.calls).to.have.length(3)
     send.mockClear()
-    await client3.shouldReply('room join 114514', '你已在房间 114514 中。')
+    await client3.shouldReply('room join 114514', '你已在房间 114514 中。输入「room leave」以离开当前房间。')
     await client1.shouldReply('room', [
       '房号：114514',
       '房主：111',

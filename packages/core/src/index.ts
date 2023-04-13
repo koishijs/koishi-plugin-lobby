@@ -65,10 +65,20 @@ class Lobby extends Service {
 
     room.subcommand('.create')
       .userFields(['id', 'name', 'locale'])
-      .action(({ session }) => {
+      .option('capacity', '-c [count:number]')
+      .action(({ session, options }) => {
         this.assert.idle(session.user.id)
-        const room = new Room(new Player(session))
+        const room = new Room(new Player(session), options)
         return session.text('.success', room)
+      })
+
+    room.subcommand('.config')
+      .userFields(['id', 'name', 'locale'])
+      .option('capacity', '-c [count:number]')
+      .action(({ session, options }) => {
+        const player = this.assert.host(session.user.id)
+        Object.assign(player.room.options, options)
+        return session.text('.success')
       })
 
     room.subcommand('.join <id:string>')
@@ -76,6 +86,9 @@ class Lobby extends Service {
       .action(({ session }, id) => {
         this.assert.idle(session.user.id)
         const room = this.assert.room(id)
+        if (room.size >= (room.options.capacity || Infinity)) {
+          return session.text('.full')
+        }
         room.join(new Player(session))
       })
 
@@ -85,7 +98,7 @@ class Lobby extends Service {
         const player = this.assert.busy(session.user.id)
         if (player.room.host !== player) {
           player.room.leave(player)
-        } else if (Object.keys(player.room.players).length === 1) {
+        } else if (player.room.size === 1) {
           player.room.destroy()
           return
         } else {
@@ -94,7 +107,7 @@ class Lobby extends Service {
           }))
           const content = (await session.prompt())?.trim()
           const index = +content
-          if (!(content && index !== player.inc && index in player.room.players)) {
+          if (!(content && index !== player.inc && (!index || index in player.room.players))) {
             return session.text('.timeout')
           } else if (!index) {
             player.room.destroy()

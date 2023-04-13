@@ -4,7 +4,7 @@ import { Game } from './game'
 export abstract class Corridor {
   static using = ['lobby']
 
-  abstract Game: typeof Game
+  abstract factory: typeof Game<any>
 
   public cmd: Command
 
@@ -16,7 +16,7 @@ export abstract class Corridor {
           await session.execute('room.create')
         }
         const player = ctx.lobby.assert.host(session.user.id)
-        new this.Game(player.room, this, options)
+        Reflect.construct(this.factory, [player.room, this, options])
       })
 
     ctx.on('ready', () => this.start())

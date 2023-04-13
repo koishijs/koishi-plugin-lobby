@@ -20,6 +20,8 @@ namespace RPSGame {
 }
 
 class RPSCorridor extends Corridor {
+  factory = RPSGame
+
   constructor(ctx: Context, public config: RPSCorridor.Config) {
     super(ctx, 'rps')
     ctx.i18n.define('zh', require('./locales/zh-CN'))

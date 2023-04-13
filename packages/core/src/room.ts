@@ -7,7 +7,7 @@ const logger = new Logger('lobby')
 
 export interface Message {
   type: string
-  param?: any[]
+  param: any[]
 }
 
 export class Room {
@@ -21,7 +21,7 @@ export class Room {
   game: Game
   speech: Room.SpeechMode = Room.SpeechMode.command
 
-  constructor(public host: Player) {
+  constructor(public host: Player, public options: Room.Options) {
     this.name = this.id = Random.id(6, 10)
     this.lobby = host.lobby
     this.lobby.rooms[this.id] = this
@@ -36,6 +36,10 @@ export class Room {
       this.players[id].send(h('i18n', { path: 'lobby.' + type }, param))
     }
     return message
+  }
+
+  get size() {
+    return Object.keys(this.players).length
   }
 
   listPlayers(ignoreHost = false) {
@@ -91,7 +95,7 @@ export class Room {
 
   leave(player: Player) {
     this._leave(player)
-    if (!Object.keys(this.players).length) {
+    if (!this.size) {
       this.destroy()
     } else {
       this.broadcast('system.leave', [player.name])
@@ -118,6 +122,21 @@ export class Room {
     logger.debug(`${this} destroyed`)
   }
 
+  async start() {
+    this.broadcast('system.start')
+    logger.debug(`game in ${this} was started`)
+    try {
+      await this.game.start()
+      this.broadcast('system.end')
+      logger.debug(`game in ${this} was finished`)
+    } catch (error) {
+      logger.debug(`game in ${this} was terminated`)
+      logger.debug(error.stack)
+      this.broadcast('system.terminated')
+    }
+    this.game = null
+  }
+
   toString() {
     return `room ${this.id}`
   }
@@ -128,5 +147,9 @@ export namespace Room {
     free,
     command,
     disabled,
+  }
+
+  export interface Options {
+    capacity?: number
   }
 }

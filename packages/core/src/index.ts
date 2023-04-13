@@ -1,12 +1,12 @@
 import { Context, Dict, Schema, Service, SessionError } from 'koishi'
 import { Room } from './room'
 import { Player } from './player'
-import { GameService } from './service'
+import { Corridor } from './corridor'
 
+export * from './corridor'
 export * from './game'
 export * from './player'
 export * from './room'
-export * from './service'
 
 declare module 'koishi' {
   interface Context {
@@ -15,7 +15,7 @@ declare module 'koishi' {
 }
 
 class Lobby extends Service {
-  games: GameService[]
+  corridors: Dict<Corridor> = Object.create(null)
   players: Dict<Player> = Object.create(null)
   rooms: Dict<Room> = Object.create(null)
 
@@ -121,10 +121,6 @@ class Lobby extends Service {
     const player = this.assertBusy(id)
     if (player.room.host !== player) throw new SessionError('lobby.assert.expect-host')
     return player
-  }
-
-  register(game: GameService) {
-    this.games.push(game)
   }
 }
 

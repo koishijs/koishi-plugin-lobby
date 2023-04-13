@@ -96,6 +96,8 @@ describe('koishi-plugin-lobby', () => {
     ].join('\n'))
 
     await client1.shouldReply('room kick 3', '只有房主可以进行此操作。')
+    await client2.shouldReply('room kick', '请输入要踢出的玩家编号。')
+    await client2.shouldReply('room kick 2', '不能对房主进行此操作。')
     await client2.shouldNotReply('room kick 1')
     expect(send.mock.calls).to.have.length(3)
     send.mockClear()
@@ -112,7 +114,7 @@ describe('koishi-plugin-lobby', () => {
     await client2.shouldReply('room leave', [
       '离开房间前可选择将房间转移给其他人：',
       '    3. 333',
-      '请输入序号以转移房主。输入 0 将直接解散房间。输入句号将取消操作。',
+      '请输入玩家编号以转移房主。输入 0 将直接解散房间。输入句号将取消操作。',
     ].join('\n'))
     await client2.shouldReply('3', '已成功离开房间。')
     expect(send.mock.calls).to.have.length(1)

@@ -43,10 +43,21 @@ export class Room {
       .join('\n')
   }
 
-  getPlayer(id: number) {
-    const player = this.players[id]
-    if (!player) throw new SessionError('lobby.exception.player-not-found', [id])
-    return player
+  getPlayers(ids: number[]) {
+    const notFound: number[] = []
+    const result: Player[] = []
+    for (const id of ids) {
+      const player = this.players[id]
+      if (!player) {
+        notFound.push(id)
+      } else if (player === this.host) {
+        throw new SessionError('lobby.exception.target-host')
+      } else {
+        result.push(player)
+      }
+    }
+    if (!notFound.length) return result
+    throw new SessionError('lobby.exception.player-not-found', [notFound.join(', ')])
   }
 
   _join(player: Player) {
@@ -60,20 +71,25 @@ export class Room {
     logger.debug(`${player} joined ${this}`)
   }
 
-  leave(id: number, source?: Player) {
-    const player = this.getPlayer(id)
+  _leave(player: Player) {
     delete this.players[player.id]
     delete this.lobby.players[player.id]
     logger.debug(`${player} left ${this}`)
+  }
 
+  kick(ids: number[]) {
+    const players = this.getPlayers(ids)
+    for (const player of players) {
+      this._leave(player)
+      player.send(h('i18n', { path: 'lobby.system.kick-self' }, [this.host.name]))
+    }
+    this.broadcast('system.kick', [players.map(p => p.name).join(', '), this.host.name])
+  }
+
+  leave(player: Player) {
+    this._leave(player)
     if (!Object.keys(this.players).length) {
       this.destroy()
-      return
-    }
-
-    if (source) {
-      this.broadcast('system.kick', [player.name, source.name])
-      player.send(h('i18n', { path: 'lobby.system.kick-self' }, [source.name]))
     } else {
       this.broadcast('system.leave', [player.name])
     }
@@ -81,7 +97,7 @@ export class Room {
 
   transfer(id: number, leave = false) {
     const oldHost = this.host
-    this.host = this.getPlayer(id)
+    this.host = this.getPlayers([id])[0]
     if (leave) {
       delete this.players[oldHost.id]
       delete this.lobby.players[oldHost.id]

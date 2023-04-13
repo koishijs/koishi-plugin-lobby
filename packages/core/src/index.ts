@@ -71,7 +71,7 @@ class Lobby extends Service {
         return session.text('.success', room)
       })
 
-    room.subcommand('.join <id:number>')
+    room.subcommand('.join <id:string>')
       .userFields(['id', 'name', 'locale'])
       .action(({ session }, id) => {
         this.assert.idle(session.user.id)
@@ -84,7 +84,7 @@ class Lobby extends Service {
       .action(async ({ session }) => {
         const player = this.assert.busy(session.user.id)
         if (player.room.host !== player) {
-          player.room.leave(player.id)
+          player.room.leave(player)
         } else if (Object.keys(player.room.players).length === 1) {
           player.room.destroy()
           return
@@ -106,17 +106,19 @@ class Lobby extends Service {
         return session.text('.success')
       })
 
-    room.subcommand('.kick [...id:number]')
+    room.subcommand('.kick <...id:number>')
       .userFields(['id', 'name'])
-      .action(({ session }, ...id) => {
+      .action(({ session }, ...ids) => {
         const player = this.assert.host(session.user.id)
-        player.room.leave(id[0], player)
+        if (!ids.length) return session.text('.expect-id')
+        player.room.kick(ids)
       })
 
-    room.subcommand('.transfer [id:number]')
+    room.subcommand('.transfer <id:number>')
       .userFields(['id', 'name'])
       .action(({ session }, id) => {
         const player = this.assert.host(session.user.id)
+        if (!id) return session.text('.expect-id')
         player.room.transfer(id)
       })
 

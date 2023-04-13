@@ -4,7 +4,7 @@ import Lobby from '.'
 export class Assert {
   constructor(private lobby: Lobby) {}
 
-  room(id: number) {
+  room(id: string) {
     const room = this.lobby.rooms[id]
     if (!room) throw new SessionError('lobby.exception.room-not-found', [id])
     return room

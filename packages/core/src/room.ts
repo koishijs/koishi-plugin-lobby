@@ -83,6 +83,7 @@ export class Room {
   }
 
   destroy() {
+    this.message('system.destroy')
     delete this.lobby.rooms[this.id]
     for (const id in this.players) {
       delete this.lobby.players[id]

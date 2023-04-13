@@ -23,7 +23,16 @@ class Lobby extends Service {
     ctx.i18n.define('zh', require('./locales/zh-CN'))
 
     ctx.private().command('lobby')
+
     const room = ctx.private().command('room')
+      .userFields(['id', 'name', 'locale'])
+      .action(({ session }) => {
+        const player = this.assertBusy(session.user.id)
+        return session.text('.overview', {
+          ...player.room,
+          players: Object.values(player.room.players).map(player => player.name).join(', '),
+        })
+      })
 
     room.subcommand('.create')
       .userFields(['id', 'name', 'locale'])
@@ -44,25 +53,55 @@ class Lobby extends Service {
 
     room.subcommand('.leave')
       .userFields(['id', 'name'])
-      .action(({ session }) => {
+      .action(async ({ session }) => {
         const player = this.assertBusy(session.user.id)
-        player.room.leave(player.id)
+        if (player.room.host !== player) {
+          player.room.leave(player.id)
+        } else if (Object.keys(player.room.players).length === 1) {
+          player.room.destroy()
+          return
+        } else {
+          const choices = Object
+            .values(player.room.players)
+            .map(({ name, id }) => id !== player.id ? [name, id] as const : null)
+            .filter(Boolean)
+          choices.unshift([session.text('commands.room.destroy.description'), null])
+          await session.send(session.text('.transfer-or-destroy', [
+            choices.map(([text], index) => `${index}. ${text}`).join('\n'),
+          ]))
+          const content = (await session.prompt())?.trim()
+          const index = +content
+          if (!(content && index in choices)) {
+            return session.text('.timeout')
+          } else if (!index) {
+            player.room.destroy()
+            return
+          } else {
+            player.room.transfer(choices[index][1], true)
+          }
+        }
         return session.text('.success')
       })
 
     room.subcommand('.kick [id:number]')
       .userFields(['id', 'name'])
       .action(({ session }, id) => {
-        const player = this.assertBusy(session.user.id)
+        const player = this.assertHost(session.user.id)
         player.room.leave(id, player)
       })
 
     room.subcommand('.transfer [id:number]')
       .userFields(['id', 'name'])
       .action(({ session }, id) => {
-        const player = this.assertBusy(session.user.id)
+        const player = this.assertHost(session.user.id)
         player.room.transfer(id)
-        return session.text('.success')
+      })
+
+    room.subcommand('.destroy')
+      .userFields(['id', 'name'])
+      .action(({ session }) => {
+        const player = this.assertHost(session.user.id)
+        player.room.destroy()
       })
   }
 
@@ -74,6 +113,12 @@ class Lobby extends Service {
   assertBusy(id: number) {
     const player = this.players[id]
     if (!player) throw new SessionError('lobby.assert.not-in-room')
+    return player
+  }
+
+  assertHost(id: number) {
+    const player = this.assertBusy(id)
+    if (player.room.host !== player) throw new SessionError('lobby.assert.expect-host')
     return player
   }
 

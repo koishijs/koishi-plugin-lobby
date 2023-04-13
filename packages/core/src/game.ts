@@ -1,11 +1,6 @@
-import { Context } from 'koishi'
+import { Room } from './room'
 
-export class Game {
-  static using = ['lobby']
-
-  constructor(ctx: Context, name: string) {
-    ctx.lobby.register(this)
-
-    ctx.command(`lobby/${name}`)
+export abstract class Game<T> {
+  constructor(public room: Room, public options: T) {
   }
 }

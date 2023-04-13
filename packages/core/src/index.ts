@@ -1,11 +1,12 @@
 import { Context, Dict, Schema, Service, SessionError } from 'koishi'
-import { Game } from './game'
 import { Room } from './room'
 import { Player } from './player'
+import { GameService } from './service'
 
 export * from './game'
 export * from './player'
 export * from './room'
+export * from './service'
 
 declare module 'koishi' {
   interface Context {
@@ -14,7 +15,7 @@ declare module 'koishi' {
 }
 
 class Lobby extends Service {
-  games: Game[]
+  games: GameService[]
   players: Dict<Player> = Object.create(null)
   rooms: Dict<Room> = Object.create(null)
 
@@ -22,7 +23,7 @@ class Lobby extends Service {
     super(ctx, 'lobby', true)
     ctx.i18n.define('zh', require('./locales/zh-CN'))
 
-    ctx.private().command('lobby')
+    ctx.private().command('game')
 
     const room = ctx.private().command('room')
       .userFields(['id', 'name', 'locale'])
@@ -122,7 +123,7 @@ class Lobby extends Service {
     return player
   }
 
-  register(game: Game) {
+  register(game: GameService) {
     this.games.push(game)
   }
 }

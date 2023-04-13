@@ -24,7 +24,7 @@ export class Room {
     this._join(host)
   }
 
-  message(type: string, param = []) {
+  broadcast(type: string, param = []) {
     const message: Message = { type, param }
     this.messages.push(message)
     for (const id in this.players) {
@@ -46,7 +46,7 @@ export class Room {
 
   join(player: Player) {
     this._join(player)
-    this.message('system.join', [player.name])
+    this.broadcast('system.join', [player.name])
     logger.debug(`${player} joined ${this}`)
   }
 
@@ -62,10 +62,10 @@ export class Room {
     }
 
     if (source) {
-      this.message('system.kick', [player.name, source.name])
+      this.broadcast('system.kick', [player.name, source.name])
       player.send(h('i18n', { path: 'lobby.system.kick-self' }, [source.name]))
     } else {
-      this.message('system.leave', [player.name])
+      this.broadcast('system.leave', [player.name])
     }
   }
 
@@ -76,14 +76,14 @@ export class Room {
       oldHost.room = null
       delete this.players[oldHost.id]
       logger.debug(`${oldHost} left ${this}`)
-      this.message('system.leave-transfer', [this.host.name, oldHost.name])
+      this.broadcast('system.leave-transfer', [this.host.name, oldHost.name])
     } else {
-      this.message('system.transfer', [this.host.name, oldHost.name])
+      this.broadcast('system.transfer', [this.host.name, oldHost.name])
     }
   }
 
   destroy() {
-    this.message('system.destroy')
+    this.broadcast('system.destroy')
     delete this.lobby.rooms[this.id]
     for (const id in this.players) {
       delete this.lobby.players[id]
@@ -93,7 +93,7 @@ export class Room {
 
   chat(player: Player, content: string, type = 'player') {
     if (!content) return
-    this.message('chat.' + type, [content, player.name])
+    this.broadcast('chat.' + type, [content, player.name])
   }
 
   toString() {

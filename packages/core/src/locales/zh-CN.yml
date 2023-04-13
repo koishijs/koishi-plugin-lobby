@@ -1,5 +1,5 @@
 commands:
-  lobby:
+  game:
     description: 游戏大厅
   room:
     description: 查看房间

@@ -26,6 +26,7 @@ const send = app.mock.bots[0].sendPrivateMessage = jest.fn<Bot['sendPrivateMessa
 before(async () => {
   logger.level = 3
   await app.start()
+  await app.mock.initUser('514')
 })
 
 after(async () => {

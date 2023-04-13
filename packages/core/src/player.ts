@@ -4,6 +4,7 @@ import Lobby from '.'
 
 export class Player {
   id: number
+  inc: number
   name: string
   locale: string
   bot: Bot

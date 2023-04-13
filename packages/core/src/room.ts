@@ -11,6 +11,8 @@ export interface Message {
 }
 
 export class Room {
+  private inc = 0
+
   id: string
   name: string
   lobby: Lobby
@@ -39,17 +41,17 @@ export class Room {
   listPlayers(ignoreHost = false) {
     return Object.values(this.players)
       .filter(player => !ignoreHost || player !== this.host)
-      .map(({ name, id }) => `    ${id}. ${name}`)
+      .map(({ name, inc }) => `    ${inc}. ${name}`)
       .join('\n')
   }
 
-  getPlayers(ids: number[]) {
+  getPlayers(incs: number[]) {
     const notFound: number[] = []
     const result: Player[] = []
-    for (const id of ids) {
-      const player = this.players[id]
+    for (const inc of incs) {
+      const player = this.players[inc]
       if (!player) {
-        notFound.push(id)
+        notFound.push(inc)
       } else if (player === this.host) {
         throw new SessionError('lobby.exception.target-host')
       } else {
@@ -62,7 +64,8 @@ export class Room {
 
   _join(player: Player) {
     player.room = this
-    this.players[player.id] = player
+    player.inc = ++this.inc
+    this.players[player.inc] = player
   }
 
   join(player: Player) {
@@ -72,7 +75,7 @@ export class Room {
   }
 
   _leave(player: Player) {
-    delete this.players[player.id]
+    delete this.players[player.inc]
     delete this.lobby.players[player.id]
     logger.debug(`${player} left ${this}`)
   }
@@ -99,9 +102,7 @@ export class Room {
     const oldHost = this.host
     this.host = this.getPlayers([id])[0]
     if (leave) {
-      delete this.players[oldHost.id]
-      delete this.lobby.players[oldHost.id]
-      logger.debug(`${oldHost} left ${this}`)
+      this._leave(oldHost)
       this.broadcast('system.leave-transfer', [this.host.name, oldHost.name])
     } else {
       this.broadcast('system.transfer', [this.host.name, oldHost.name])
@@ -111,8 +112,8 @@ export class Room {
   destroy() {
     this.broadcast('system.destroy')
     delete this.lobby.rooms[this.id]
-    for (const id in this.players) {
-      delete this.lobby.players[id]
+    for (const player of Object.values(this.players)) {
+      delete this.lobby.players[player.inc]
     }
     logger.debug(`${this} destroyed`)
   }

@@ -94,7 +94,7 @@ class Lobby extends Service {
           }))
           const content = (await session.prompt())?.trim()
           const index = +content
-          if (!(content && index !== player.id && index in player.room.players)) {
+          if (!(content && index !== player.inc && index in player.room.players)) {
             return session.text('.timeout')
           } else if (!index) {
             player.room.destroy()
@@ -108,18 +108,18 @@ class Lobby extends Service {
 
     room.subcommand('.kick <...id:number>')
       .userFields(['id', 'name'])
-      .action(({ session }, ...ids) => {
+      .action(({ session }, ...incs) => {
         const player = this.assert.host(session.user.id)
-        if (!ids.length) return session.text('.expect-id')
-        player.room.kick(ids)
+        if (!incs.length) return session.text('.expect-id')
+        player.room.kick(incs)
       })
 
     room.subcommand('.transfer <id:number>')
       .userFields(['id', 'name'])
-      .action(({ session }, id) => {
+      .action(({ session }, inc) => {
         const player = this.assert.host(session.user.id)
-        if (!id) return session.text('.expect-id')
-        player.room.transfer(id)
+        if (!inc) return session.text('.expect-id')
+        player.room.transfer(inc)
       })
 
     room.subcommand('.destroy')

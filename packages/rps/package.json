@@ -45,7 +45,7 @@
   ],
   "peerDependencies": {
     "koishi": "^4.12.4",
-    "koishi-plugin-lobby": "^0.1.0"
+    "koishi-plugin-lobby": "^0.1.2"
   },
   "devDependencies": {
     "@types/node": "^18.15.3",

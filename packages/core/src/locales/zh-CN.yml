@@ -31,9 +31,13 @@ commands:
     description: 转移房主
   room.destroy:
     description: 解散房间
+  talk:
+    description: 房间内发言
+    messages:
+      disabled: 当前阶段房间禁止发言。
 
 lobby:
-  assert:
+  exception:
     already-in-room: 你已在房间 {id} 中。
     not-in-room: 你并不在任何房间中。
     room-not-found: 房间 {0} 不存在。
@@ -50,3 +54,5 @@ lobby:
     start: 系统消息：游戏开始。
     end: 系统消息：游戏结束。
     terminated: 系统消息：游戏因为异常而中止。
+  talk:
+    player: '{1}：{0}'

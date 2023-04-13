@@ -9,7 +9,7 @@ export class Player {
   bot: Bot
   userId: string
   platform: string
-  room: Room = null
+  room: Room
   lobby: Lobby
 
   constructor(session: Session<'id' | 'name' | 'locale'>) {
@@ -32,6 +32,11 @@ export class Player {
       locale: this.locale,
     })
     return this.bot.sendPrivateMessage(this.userId, content, { session })
+  }
+
+  talk(content: string, type = 'player') {
+    if (!content) return
+    this.room.broadcast('talk.' + type, [content, this.name])
   }
 
   toString() {

@@ -23,7 +23,7 @@
     "test:html": "shx rm -rf coverage && c8 -r html yarn test"
   },
   "devDependencies": {
-    "@koishijs/eslint-config": "^1.0.1",
+    "@koishijs/eslint-config": "^1.0.2",
     "@koishijs/plugin-database-memory": "^2.3.4",
     "@koishijs/plugin-help": "^2.2.2",
     "@koishijs/plugin-mock": "^2.4.3",

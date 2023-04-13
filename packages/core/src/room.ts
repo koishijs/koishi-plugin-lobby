@@ -1,5 +1,6 @@
 import { Dict, h, Logger, Random, SessionError } from 'koishi'
 import { Player } from './player'
+import { Game } from './game'
 import Lobby from '.'
 
 const logger = new Logger('lobby')
@@ -15,6 +16,8 @@ export class Room {
   lobby: Lobby
   players: Dict<Player> = Object.create(null)
   messages: Message[] = []
+  game: Game
+  speech: Room.SpeechMode = Room.SpeechMode.free
 
   constructor(public host: Player) {
     this.name = this.id = Random.id(6, 10)
@@ -35,7 +38,7 @@ export class Room {
 
   getPlayer(id: number) {
     const player = this.players[id]
-    if (!player) throw new SessionError('lobby.assert.player-not-found', [id])
+    if (!player) throw new SessionError('lobby.exception.player-not-found', [id])
     return player
   }
 
@@ -91,12 +94,15 @@ export class Room {
     logger.debug(`${this} destroyed`)
   }
 
-  chat(player: Player, content: string, type = 'player') {
-    if (!content) return
-    this.broadcast('chat.' + type, [content, player.name])
-  }
-
   toString() {
     return `room ${this.id}`
+  }
+}
+
+export namespace Room {
+  export const enum SpeechMode {
+    free,
+    command,
+    disabled,
   }
 }

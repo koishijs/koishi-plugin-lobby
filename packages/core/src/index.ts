@@ -1,4 +1,5 @@
-import { Context, Dict, Schema, Service, SessionError } from 'koishi'
+import { Context, Dict, Schema, Service } from 'koishi'
+import { Assert } from './assert'
 import { Room } from './room'
 import { Player } from './player'
 import { Corridor } from './corridor'
@@ -15,20 +16,33 @@ declare module 'koishi' {
 }
 
 class Lobby extends Service {
-  corridors: Dict<Corridor> = Object.create(null)
-  players: Dict<Player> = Object.create(null)
-  rooms: Dict<Room> = Object.create(null)
+  public assert = new Assert(this)
+  public rooms: Dict<Room> = Object.create(null)
+  public players: Dict<Player> = Object.create(null)
+  public corridors: Dict<Corridor> = Object.create(null)
 
   constructor(ctx: Context, public config: Lobby.Config) {
     super(ctx, 'lobby', true)
     ctx.i18n.define('zh', require('./locales/zh-CN'))
+
+    ctx.before('attach-user', (session, fields) => {
+      fields.add('id')
+    })
+
+    ctx.private().middleware((session, next) => {
+      const player = this.players[session.user['id']]
+      if (player?.room.speech !== Room.SpeechMode.free) return next()
+      return next(() => {
+        player.talk(session.content)
+      })
+    })
 
     ctx.private().command('game')
 
     const room = ctx.private().command('room')
       .userFields(['id', 'name', 'locale'])
       .action(({ session }) => {
-        const player = this.assertBusy(session.user.id)
+        const player = this.assert.busy(session.user.id)
         return session.text('.overview', {
           ...player.room,
           players: Object.values(player.room.players).map(player => player.name).join(', '),
@@ -38,7 +52,7 @@ class Lobby extends Service {
     room.subcommand('.create')
       .userFields(['id', 'name', 'locale'])
       .action(({ session }) => {
-        this.assertIdle(session.user.id)
+        this.assert.idle(session.user.id)
         const room = new Room(new Player(session))
         return session.text('.success', room)
       })
@@ -46,16 +60,15 @@ class Lobby extends Service {
     room.subcommand('.join <id:number>')
       .userFields(['id', 'name', 'locale'])
       .action(({ session }, id) => {
-        this.assertIdle(session.user.id)
-        const room = this.rooms[id]
-        if (!room) return session.text('lobby.assert.room-not-found', [id])
+        this.assert.idle(session.user.id)
+        const room = this.assert.room(id)
         room.join(new Player(session))
       })
 
     room.subcommand('.leave')
       .userFields(['id', 'name'])
       .action(async ({ session }) => {
-        const player = this.assertBusy(session.user.id)
+        const player = this.assert.busy(session.user.id)
         if (player.room.host !== player) {
           player.room.leave(player.id)
         } else if (Object.keys(player.room.players).length === 1) {
@@ -87,40 +100,33 @@ class Lobby extends Service {
     room.subcommand('.kick [id:number]')
       .userFields(['id', 'name'])
       .action(({ session }, id) => {
-        const player = this.assertHost(session.user.id)
+        const player = this.assert.host(session.user.id)
         player.room.leave(id, player)
       })
 
     room.subcommand('.transfer [id:number]')
       .userFields(['id', 'name'])
       .action(({ session }, id) => {
-        const player = this.assertHost(session.user.id)
+        const player = this.assert.host(session.user.id)
         player.room.transfer(id)
       })
 
     room.subcommand('.destroy')
       .userFields(['id', 'name'])
       .action(({ session }) => {
-        const player = this.assertHost(session.user.id)
+        const player = this.assert.host(session.user.id)
         player.room.destroy()
       })
-  }
 
-  assertIdle(id: number) {
-    const player = this.players[id]
-    if (player) throw new SessionError('lobby.assert.already-in-room', player.room)
-  }
-
-  assertBusy(id: number) {
-    const player = this.players[id]
-    if (!player) throw new SessionError('lobby.assert.not-in-room')
-    return player
-  }
-
-  assertHost(id: number) {
-    const player = this.assertBusy(id)
-    if (player.room.host !== player) throw new SessionError('lobby.assert.expect-host')
-    return player
+    room.subcommand('talk <content:text>')
+      .userFields(['id', 'name'])
+      .action(({ session }, content) => {
+        const player = this.assert.busy(session.user.id)
+        if (player.room.speech === Room.SpeechMode.disabled) {
+          return session.text('.disabled')
+        }
+        player.talk(content)
+      })
   }
 }
 

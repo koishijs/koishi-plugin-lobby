@@ -64,6 +64,10 @@ describe('koishi-plugin-lobby', () => {
       '成员列表：111, 222, 333',
     ].join('\n'))
 
+    await client1.shouldNotReply('test')
+    expect(send.mock.calls).to.have.length(3)
+    send.mockClear()
+
     await client2.shouldReply('room transfer 2', '只有房主可以进行此操作。')
     await client1.shouldNotReply('room transfer 2')
     expect(send.mock.calls).to.have.length(3)

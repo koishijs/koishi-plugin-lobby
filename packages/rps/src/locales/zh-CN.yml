@@ -1,0 +1,12 @@
+commands:
+  rps:
+    description: 石头剪刀布
+    options:
+      rounds: 获胜局数
+
+lobby.game.rps:
+  input: |-
+    请输入你的选择：
+    R. 石头
+    P. 布
+    S. 剪刀

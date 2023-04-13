@@ -31,7 +31,7 @@ class Lobby extends Service {
 
     ctx.private().middleware((session, next) => {
       const player = this.players[session.user['id']]
-      if (player?.room.speech !== Room.SpeechMode.command) return next()
+      if (player?.room.speech === Room.SpeechMode.disabled) return next()
       const content = this._stripPrefix(session)
       if (!content) return next()
       return session.execute({
@@ -47,10 +47,20 @@ class Lobby extends Service {
       .userFields(['id', 'name', 'locale'])
       .action(({ session }) => {
         const player = this.assert.busy(session.user.id)
-        return session.text('.overview', {
-          ...player.room,
-          players: Object.values(player.room.players).map(player => player.name).join(', '),
-        })
+        const output = [session.text('.overview', {
+          id: player.room.id,
+          host: player.room.host.name,
+          players: player.room.listPlayers(),
+        })]
+        if (player.room.speech !== Room.SpeechMode.disabled) {
+          const prefix = this._resolvePrefix(session)?.[0]
+          if (prefix) {
+            output.push(session.text('.talk-prefix', [prefix]))
+          } else {
+            output.push(session.text('.talk-free'))
+          }
+        }
+        return output.join('\n')
       })
 
     room.subcommand('.create')
@@ -79,33 +89,28 @@ class Lobby extends Service {
           player.room.destroy()
           return
         } else {
-          const choices = Object
-            .values(player.room.players)
-            .map(({ name, id }) => id !== player.id ? [name, id] as const : null)
-            .filter(Boolean)
-          choices.unshift([session.text('commands.room.destroy.description'), null])
-          await session.send(session.text('.transfer-or-destroy', [
-            choices.map(([text], index) => `${index}. ${text}`).join('\n'),
-          ]))
+          await session.send(session.text('.transfer-or-destroy', {
+            players: player.room.listPlayers(true),
+          }))
           const content = (await session.prompt())?.trim()
           const index = +content
-          if (!(content && index in choices)) {
+          if (!(content && index !== player.id && index in player.room.players)) {
             return session.text('.timeout')
           } else if (!index) {
             player.room.destroy()
             return
           } else {
-            player.room.transfer(choices[index][1], true)
+            player.room.transfer(index, true)
           }
         }
         return session.text('.success')
       })
 
-    room.subcommand('.kick [id:number]')
+    room.subcommand('.kick [...id:number]')
       .userFields(['id', 'name'])
-      .action(({ session }, id) => {
+      .action(({ session }, ...id) => {
         const player = this.assert.host(session.user.id)
-        player.room.leave(id, player)
+        player.room.leave(id[0], player)
       })
 
     room.subcommand('.transfer [id:number]')
@@ -133,11 +138,15 @@ class Lobby extends Service {
       })
   }
 
-  private _stripPrefix(session: Session) {
+  private _resolvePrefix(session: Session) {
     const value = session.resolve(this.config.speech.prefix)
     const result = Array.isArray(value) ? value : [value || '']
+    return result.map(source => h.escape(source))
+  }
+
+  private _stripPrefix(session: Session) {
     const content = session.parsed.content
-    for (const prefix of result.map(source => h.escape(source))) {
+    for (const prefix of this._resolvePrefix(session)) {
       if (!content.startsWith(prefix)) continue
       return content.slice(prefix.length).trim()
     }

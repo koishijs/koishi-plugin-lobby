@@ -36,6 +36,13 @@ export class Room {
     return message
   }
 
+  listPlayers(ignoreHost = false) {
+    return Object.values(this.players)
+      .filter(player => !ignoreHost || player !== this.host)
+      .map(({ name, id }) => `    ${id}. ${name}`)
+      .join('\n')
+  }
+
   getPlayer(id: number) {
     const player = this.players[id]
     if (!player) throw new SessionError('lobby.exception.player-not-found', [id])

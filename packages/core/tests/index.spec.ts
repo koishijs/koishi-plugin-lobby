@@ -41,7 +41,9 @@ describe('koishi-plugin-lobby', () => {
     await client1.shouldReply('room', [
       '房号：114514',
       '房主：111',
-      '成员列表：111',
+      '成员列表：',
+      '    1. 111',
+      '发送「:内容」可在房间内发言。',
     ].join('\n'))
 
     await client2.shouldReply('room join 1919810', '房间 1919810 不存在。')
@@ -51,7 +53,10 @@ describe('koishi-plugin-lobby', () => {
     await client2.shouldReply('room', [
       '房号：114514',
       '房主：111',
-      '成员列表：111, 222',
+      '成员列表：',
+      '    1. 111',
+      '    2. 222',
+      '发送「:内容」可在房间内发言。',
     ].join('\n'))
 
     await client3.shouldNotReply('room join 114514')
@@ -61,10 +66,18 @@ describe('koishi-plugin-lobby', () => {
     await client1.shouldReply('room', [
       '房号：114514',
       '房主：111',
-      '成员列表：111, 222, 333',
+      '成员列表：',
+      '    1. 111',
+      '    2. 222',
+      '    3. 333',
+      '发送「:内容」可在房间内发言。',
     ].join('\n'))
 
     await client1.shouldNotReply('test')
+    expect(send.mock.calls).to.have.length(0)
+    send.mockClear()
+
+    await client1.shouldNotReply(':test')
     expect(send.mock.calls).to.have.length(3)
     send.mockClear()
 
@@ -75,7 +88,11 @@ describe('koishi-plugin-lobby', () => {
     await client2.shouldReply('room', [
       '房号：114514',
       '房主：222',
-      '成员列表：111, 222, 333',
+      '成员列表：',
+      '    1. 111',
+      '    2. 222',
+      '    3. 333',
+      '发送「:内容」可在房间内发言。',
     ].join('\n'))
 
     await client1.shouldReply('room kick 3', '只有房主可以进行此操作。')
@@ -86,22 +103,26 @@ describe('koishi-plugin-lobby', () => {
     await client2.shouldReply('room', [
       '房号：114514',
       '房主：222',
-      '成员列表：222, 333',
+      '成员列表：',
+      '    2. 222',
+      '    3. 333',
+      '发送「:内容」可在房间内发言。',
     ].join('\n'))
 
     await client2.shouldReply('room leave', [
       '离开房间前可选择将房间转移给其他人：',
-      '0. 解散房间',
-      '1. 333',
-      '请键入序号以进行操作。',
+      '    3. 333',
+      '请输入序号以转移房主。输入 0 将直接解散房间。输入句号将取消操作。',
     ].join('\n'))
-    await client2.shouldReply('1', '已成功离开房间。')
+    await client2.shouldReply('3', '已成功离开房间。')
     expect(send.mock.calls).to.have.length(1)
     send.mockClear()
     await client3.shouldReply('room', [
       '房号：114514',
       '房主：333',
-      '成员列表：333',
+      '成员列表：',
+      '    3. 333',
+      '发送「:内容」可在房间内发言。',
     ].join('\n'))
 
     await client3.shouldNotReply('room leave')

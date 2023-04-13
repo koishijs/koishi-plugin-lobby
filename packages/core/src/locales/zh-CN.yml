@@ -6,8 +6,11 @@ commands:
     messages:
       overview: |-
         房号：{id}
-        房主：{host.name}
-        成员列表：{players}
+        房主：{host}
+        成员列表：
+        {players}
+      talk-free: 你发送的所有消息将在房间内广播。
+      talk-prefix: 发送「{0}内容」可在房间内发言。
   room.create:
     description: 创建房间
     messages:
@@ -22,8 +25,8 @@ commands:
       success: 已成功离开房间。
       transfer-or-destroy: |-
         离开房间前可选择将房间转移给其他人：
-        {0}
-        请键入序号以进行操作。
+        {players}
+        请输入序号以转移房主。输入 0 将直接解散房间。输入句号将取消操作。
       timeout: 操作超时，已自动取消。
   room.kick:
     description: 踢出房间
@@ -34,7 +37,7 @@ commands:
   talk:
     description: 房间内发言
     messages:
-      disabled: 当前阶段房间禁止发言。
+      disabled: 当前阶段房间内禁止发言。
 
 lobby:
   exception:

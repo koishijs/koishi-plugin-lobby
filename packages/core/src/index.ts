@@ -1,4 +1,4 @@
-import { Context, Dict, Schema, Service } from 'koishi'
+import { Computed, Context, Dict, h, Schema, Service, Session } from 'koishi'
 import { Assert } from './assert'
 import { Room } from './room'
 import { Player } from './player'
@@ -25,15 +25,19 @@ class Lobby extends Service {
     super(ctx, 'lobby', true)
     ctx.i18n.define('zh', require('./locales/zh-CN'))
 
-    ctx.before('attach-user', (session, fields) => {
+    ctx.private().before('attach-user', (session, fields) => {
       fields.add('id')
     })
 
     ctx.private().middleware((session, next) => {
       const player = this.players[session.user['id']]
-      if (player?.room.speech !== Room.SpeechMode.free) return next()
-      return next(() => {
-        player.talk(session.content)
+      if (player?.room.speech !== Room.SpeechMode.command) return next()
+      const content = this._stripPrefix(session)
+      if (!content) return next()
+      return session.execute({
+        name: 'talk',
+        args: [content],
+        session,
       })
     })
 
@@ -128,14 +132,32 @@ class Lobby extends Service {
         player.talk(content)
       })
   }
+
+  private _stripPrefix(session: Session) {
+    const value = session.resolve(this.config.speech.prefix)
+    const result = Array.isArray(value) ? value : [value || '']
+    const content = session.parsed.content
+    for (const prefix of result.map(source => h.escape(source))) {
+      if (!content.startsWith(prefix)) continue
+      return content.slice(prefix.length).trim()
+    }
+  }
 }
 
 namespace Lobby {
   export const using = ['database']
 
-  export interface Config {}
+  export interface Config {
+    speech: {
+      prefix: Computed<string[]>
+    }
+  }
 
-  export const Config: Schema<Config> = Schema.object({})
+  export const Config: Schema<Config> = Schema.object({
+    speech: Schema.object({
+      prefix: Schema.computed(Schema.array(String).role('table')).default([':', '：']).description('带有此前缀的消息将被广播到房间内。'),
+    }).description('聊天设置'),
+  })
 }
 
 export default Lobby

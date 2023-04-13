@@ -21,6 +21,7 @@
   },
   "homepage": "https://lobby.koishi.chat",
   "koishi": {
+    "preview": true,
     "description": {
       "en": "Lobby service",
       "zh": "游戏大厅服务"

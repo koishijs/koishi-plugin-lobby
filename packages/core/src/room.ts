@@ -17,7 +17,7 @@ export class Room {
   players: Dict<Player> = Object.create(null)
   messages: Message[] = []
   game: Game
-  speech: Room.SpeechMode = Room.SpeechMode.free
+  speech: Room.SpeechMode = Room.SpeechMode.command
 
   constructor(public host: Player) {
     this.name = this.id = Random.id(6, 10)
@@ -76,8 +76,8 @@ export class Room {
     const oldHost = this.host
     this.host = this.getPlayer(id)
     if (leave) {
-      oldHost.room = null
       delete this.players[oldHost.id]
+      delete this.lobby.players[oldHost.id]
       logger.debug(`${oldHost} left ${this}`)
       this.broadcast('system.leave-transfer', [this.host.name, oldHost.name])
     } else {

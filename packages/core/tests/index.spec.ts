@@ -117,7 +117,7 @@ describe('koishi-plugin-lobby', () => {
     await client2.shouldReply('room leave', [
       '离开房间前可选择将房间转移给其他人：',
       '    3. 333',
-      '请输入玩家编号以转移房主。输入 0 将直接解散房间。输入句号将取消操作。',
+      '请输入玩家编号以转移房主。输入 0 将直接解散房间。输入任何其他内容将取消操作。',
     ].join('\n'))
     await client2.shouldReply('3', '已成功离开房间。')
     expect(send.mock.calls).to.have.length(1)

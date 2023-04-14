@@ -33,7 +33,7 @@ commands:
       transfer-or-destroy: |-
         离开房间前可选择将房间转移给其他人：
         {players}
-        请输入玩家编号以转移房主。输入 0 将直接解散房间。输入句号将取消操作。
+        请输入玩家编号以转移房主。输入 0 将直接解散房间。输入任何其他内容将取消操作。
       timeout: 操作超时，已自动取消。
   room.kick:
     description: 踢出房间

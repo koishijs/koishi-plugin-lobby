@@ -7,8 +7,4 @@ export abstract class Game<T = any> {
   }
 
   abstract start(): Promise<void>
-
-  broadcast(type: string, param = []) {
-    this.room.broadcast(`${this.corridor.name}.${type}`, param)
-  }
 }

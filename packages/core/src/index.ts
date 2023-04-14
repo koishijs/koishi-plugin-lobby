@@ -21,7 +21,7 @@ class Lobby extends Service {
   public players: Dict<Player> = Object.create(null)
   public corridors: Dict<Corridor> = Object.create(null)
 
-  constructor(ctx: Context, public config: Lobby.Config) {
+  constructor(public ctx: Context, public config: Lobby.Config) {
     super(ctx, 'lobby', true)
     ctx.i18n.define('zh', require('./locales/zh-CN'))
 
@@ -140,6 +140,13 @@ class Lobby extends Service {
       .action(({ session }) => {
         const player = this.assert.host(session.user.id)
         player.room.destroy()
+      })
+
+    room.subcommand('.start')
+      .userFields(['id', 'name'])
+      .action(({ session }) => {
+        const player = this.assert.host(session.user.id)
+        player.room.start()
       })
 
     room.subcommand('talk <content:text>')

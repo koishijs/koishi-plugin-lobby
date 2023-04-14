@@ -1,4 +1,4 @@
-import { Dict, h, Logger, Random, SessionError } from 'koishi'
+import { Dict, h, Logger, Random, Session, SessionError } from 'koishi'
 import { Player } from './player'
 import { Game } from './game'
 import Lobby from '.'
@@ -36,6 +36,32 @@ export class Room {
       this.players[id].send(h('i18n', { path: 'lobby.' + type }, param))
     }
     return message
+  }
+
+  prompt(players: Player[], accept: (session: Session, player: Player) => string, timeout: number) {
+    return new Promise<Map<Player, string>>((resolve, reject) => {
+      const result = new Map<Player, string>()
+      const dispose1 = this.lobby.ctx.middleware((session, next) => {
+        if (session.subtype !== 'private') return next()
+        for (const player of players) {
+          if (player.userId !== session.userId || player.platform !== session.platform) continue
+          const content = accept(session, player)
+          if (typeof content !== 'string') return next()
+          result.set(player, content)
+          if (result.size === players.length) _resolve()
+          return
+        }
+        return next()
+      })
+      const dispose2 = this.lobby.ctx.setTimeout(() => {
+        _resolve()
+      }, timeout)
+      const _resolve = () => {
+        resolve(result)
+        dispose1()
+        dispose2()
+      }
+    })
   }
 
   get size() {

@@ -179,8 +179,11 @@ namespace Lobby {
   export const using = ['database']
 
   export interface Config {
-    speech: {
-      prefix: Computed<string[]>
+    speech?: {
+      prefix?: Computed<string[]>
+    }
+    delay?: {
+      message?: number
     }
   }
 
@@ -188,6 +191,9 @@ namespace Lobby {
     speech: Schema.object({
       prefix: Schema.computed(Schema.array(String).role('table')).default([':', '：']).description('带有此前缀的消息将被广播到房间内。'),
     }).description('聊天设置'),
+    delay: Schema.object({
+      message: Schema.number().default(100).description('发送消息后等待的时间 (毫秒)，用于防止消息顺序错乱。'),
+    }).description('延迟设置'),
   })
 }
 

@@ -29,13 +29,12 @@ export class Room {
     this._join(host)
   }
 
-  broadcast(type: string, param = []) {
+  async broadcast(type: string, param = []) {
     const message: Message = { type, param }
     this.messages.push(message)
-    for (const id in this.players) {
-      this.players[id].send(h('i18n', { path: 'lobby.' + type }, param))
-    }
-    return message
+    await Promise.all(Object.values(this.players).map(player => {
+      return player.send(h('i18n', { path: 'lobby.' + type }, param))
+    }))
   }
 
   prompt(players: Player[], accept: (session: Session, player: Player) => string, timeout: number) {

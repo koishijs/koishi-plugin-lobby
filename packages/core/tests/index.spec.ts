@@ -1,4 +1,5 @@
 import { Bot, Context, h, Logger, Random } from 'koishi'
+import { install, InstalledClock } from '@sinonjs/fake-timers'
 import lobby from 'koishi-plugin-lobby'
 import mock from '@koishijs/plugin-mock'
 import memory from '@koishijs/plugin-database-memory'
@@ -8,9 +9,14 @@ import { expect } from 'chai'
 const logger = new Logger('lobby')
 
 const app = new Context()
-app.plugin(lobby)
 app.plugin(mock)
 app.plugin(memory)
+
+app.plugin(lobby, {
+  delay: {
+    message: 0,
+  },
+})
 
 const client1 = app.mock.client('111')
 const client2 = app.mock.client('222')
@@ -23,14 +29,18 @@ const send = app.mock.bots[0].sendPrivateMessage = jest.fn<Bot['sendPrivateMessa
   return []
 })
 
+let clock: InstalledClock
+
 before(async () => {
   logger.level = 3
+  clock = install({ shouldAdvanceTime: true, advanceTimeDelta: 5 })
   await app.start()
   await app.mock.initUser('514')
 })
 
 after(async () => {
   await app.stop()
+  clock.uninstall()
   logger.level = 2
 })
 
@@ -63,6 +73,7 @@ describe('koishi-plugin-lobby', () => {
     await client3.shouldReply('room join 114514', '该房间人数已满，无法加入。')
     await client1.shouldReply('room config -c 3', '设置修改成功！')
     await client3.shouldNotReply('room join 114514')
+    await clock.runAllAsync()
     expect(send.mock.calls).to.have.length(3)
     send.mockClear()
     await client3.shouldReply('room join 114514', '你已在房间 114514 中。输入「room leave」以离开当前房间。')
@@ -77,15 +88,18 @@ describe('koishi-plugin-lobby', () => {
     ].join('\n'))
 
     await client1.shouldNotReply('test')
+    await clock.runAllAsync()
     expect(send.mock.calls).to.have.length(0)
     send.mockClear()
 
     await client1.shouldNotReply(':test')
+    await clock.runAllAsync()
     expect(send.mock.calls).to.have.length(3)
     send.mockClear()
 
     await client2.shouldReply('room transfer 2', '只有房主可以进行此操作。')
     await client1.shouldNotReply('room transfer 2')
+    await clock.runAllAsync()
     expect(send.mock.calls).to.have.length(3)
     send.mockClear()
     await client2.shouldReply('room', [
@@ -102,6 +116,7 @@ describe('koishi-plugin-lobby', () => {
     await client2.shouldReply('room kick', '请输入要踢出的玩家编号。')
     await client2.shouldReply('room kick 2', '不能对房主进行此操作。')
     await client2.shouldNotReply('room kick 1')
+    await clock.runAllAsync()
     expect(send.mock.calls).to.have.length(3)
     send.mockClear()
     await client1.shouldReply('room', '你并不在任何房间中。')
@@ -120,6 +135,7 @@ describe('koishi-plugin-lobby', () => {
       '请输入玩家编号以转移房主。输入 0 将直接解散房间。输入任何其他内容将取消操作。',
     ].join('\n'))
     await client2.shouldReply('3', '已成功离开房间。')
+    await clock.runAllAsync()
     expect(send.mock.calls).to.have.length(1)
     send.mockClear()
     await client3.shouldReply('room', [
@@ -131,6 +147,7 @@ describe('koishi-plugin-lobby', () => {
     ].join('\n'))
 
     await client3.shouldNotReply('room leave')
+    await clock.runAllAsync()
     expect(send.mock.calls).to.have.length(1)
     send.mockClear()
   })

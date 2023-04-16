@@ -1,4 +1,4 @@
-import { Context, h, Schema, sleep } from 'koishi'
+import { Context, h, Schema } from 'koishi'
 import { Corridor, Game, Player } from 'koishi-plugin-lobby'
 
 class RPSGame extends Game<RPSGame.Options> {
@@ -18,18 +18,17 @@ class RPSGame extends Game<RPSGame.Options> {
     const players = Object.values(this.room.players)
     const scores = new Map(players.map(p => [p, 0]))
     while (true) {
-      this.room.broadcast('game.rps.input', [++this.round])
+      await this.room.broadcast('game.rps.input', [++this.round])
       const results = await this.room.prompt(players, (session, player) => {
         const content = session.content.trim().toLowerCase()
-        if (!'rps'.includes(content)) return
-        session.send(h('i18n', { path: 'lobby.game.rps.accepted' }, [this.formatChoice(content)]))
+        if (content.length !== 1 || !'rps'.includes(content)) return
+        player.send(h('i18n', { path: 'lobby.game.rps.accepted' }, [this.formatChoice(content)]))
         return content
       }, 30000)
-      await sleep(500)
       const choices = players.map(p => results.get(p))
       const outputs = players.map(p => this.formatOutput(results.get(p), p.name))
       if (choices[0] === choices[1]) {
-        this.room.broadcast('game.rps.result-0', outputs)
+        await this.room.broadcast('game.rps.result-0', outputs)
       } else {
         let winner: Player
         if (!choices[0]) {
@@ -42,11 +41,11 @@ class RPSGame extends Game<RPSGame.Options> {
             || choices[0] === 's' && choices[1] === 'p'
             ? players[0] : players[1]
         }
-        this.room.broadcast('game.rps.result-1', [...outputs, winner.name])
+        await this.room.broadcast('game.rps.result-1', [...outputs, winner.name])
         const score = scores.get(winner) + 1
         scores.set(winner, score)
         if (score >= this.options.rounds) {
-          this.room.broadcast('game.rps.finish', [winner.name])
+          await this.room.broadcast('game.rps.finish', [winner.name])
           break
         }
       }

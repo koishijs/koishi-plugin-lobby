@@ -1,4 +1,4 @@
-import { Bot, Fragment, Session } from 'koishi'
+import { Bot, Fragment, Session, sleep } from 'koishi'
 import { Room } from './room'
 import Lobby from '.'
 
@@ -12,6 +12,8 @@ export class Player {
   platform: string
   room: Room
   lobby: Lobby
+
+  private sendTask = Promise.resolve()
 
   constructor(session: Session<'id' | 'name' | 'locale'>) {
     this.lobby = session.app.lobby
@@ -32,7 +34,10 @@ export class Player {
       platform: this.platform,
       locale: this.locale,
     })
-    return this.bot.sendPrivateMessage(this.userId, content, { session })
+    return this.sendTask = this.sendTask.then(async () => {
+      await this.bot.sendPrivateMessage(this.userId, content, { session })
+      await sleep(this.lobby.config.delay.message)
+    })
   }
 
   talk(content: string, type = 'player') {

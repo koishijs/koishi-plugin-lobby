@@ -11,12 +11,7 @@ const logger = new Logger('lobby')
 const app = new Context()
 app.plugin(mock)
 app.plugin(memory)
-
-app.plugin(lobby, {
-  delay: {
-    message: 0,
-  },
-})
+app.plugin(lobby)
 
 const client1 = app.mock.client('111')
 const client2 = app.mock.client('222')
@@ -47,9 +42,9 @@ after(async () => {
 describe('koishi-plugin-lobby', () => {
   it('basic usage', async () => {
     id.mockReturnValueOnce('114514')
-    await client1.shouldReply('room create -c 2', '房间创建成功，编号为 114514。')
-    await client1.shouldReply('room create', '你已在房间 114514 中。输入「room leave」以离开当前房间。')
-    await client1.shouldReply('room', [
+    await client1.shouldReply('lobby create -c 2', '房间创建成功，编号为 114514。')
+    await client1.shouldReply('lobby create', '你已在房间 114514 中。输入「room leave」以离开当前房间。')
+    await client1.shouldReply('lobby room', [
       '房号：114514',
       '房主：111',
       '成员列表：',
@@ -57,11 +52,11 @@ describe('koishi-plugin-lobby', () => {
       '发送「:内容」可在房间内发言。',
     ].join('\n'))
 
-    await client2.shouldReply('room join 1919810', '房间 1919810 不存在。')
-    await client2.shouldNotReply('room join 114514')
+    await client2.shouldReply('lobby join 1919810', '房间 1919810 不存在。')
+    await client2.shouldNotReply('lobby join 114514')
     expect(send.mock.calls).to.have.length(2)
     send.mockClear()
-    await client2.shouldReply('room', [
+    await client2.shouldReply('lobby room', [
       '房号：114514',
       '房主：111',
       '成员列表：',
@@ -70,14 +65,14 @@ describe('koishi-plugin-lobby', () => {
       '发送「:内容」可在房间内发言。',
     ].join('\n'))
 
-    await client3.shouldReply('room join 114514', '该房间人数已满，无法加入。')
-    await client1.shouldReply('room config -c 3', '设置修改成功！')
-    await client3.shouldNotReply('room join 114514')
+    await client3.shouldReply('lobby join 114514', '该房间人数已满，无法加入。')
+    await client1.shouldReply('lobby config -c 3', '设置修改成功！')
+    await client3.shouldNotReply('lobby join 114514')
     await clock.runAllAsync()
     expect(send.mock.calls).to.have.length(3)
     send.mockClear()
-    await client3.shouldReply('room join 114514', '你已在房间 114514 中。输入「room leave」以离开当前房间。')
-    await client1.shouldReply('room', [
+    await client3.shouldReply('lobby join 114514', '你已在房间 114514 中。输入「room leave」以离开当前房间。')
+    await client1.shouldReply('lobby room', [
       '房号：114514',
       '房主：111',
       '成员列表：',
@@ -97,12 +92,12 @@ describe('koishi-plugin-lobby', () => {
     expect(send.mock.calls).to.have.length(3)
     send.mockClear()
 
-    await client2.shouldReply('room transfer 2', '只有房主可以进行此操作。')
-    await client1.shouldNotReply('room transfer 2')
+    await client2.shouldReply('lobby transfer 2', '只有房主可以进行此操作。')
+    await client1.shouldNotReply('lobby transfer 2')
     await clock.runAllAsync()
     expect(send.mock.calls).to.have.length(3)
     send.mockClear()
-    await client2.shouldReply('room', [
+    await client2.shouldReply('lobby room', [
       '房号：114514',
       '房主：222',
       '成员列表：',
@@ -112,15 +107,15 @@ describe('koishi-plugin-lobby', () => {
       '发送「:内容」可在房间内发言。',
     ].join('\n'))
 
-    await client1.shouldReply('room kick 3', '只有房主可以进行此操作。')
-    await client2.shouldReply('room kick', '请输入要踢出的玩家编号。')
-    await client2.shouldReply('room kick 2', '不能对房主进行此操作。')
-    await client2.shouldNotReply('room kick 1')
+    await client1.shouldReply('lobby kick 3', '只有房主可以进行此操作。')
+    await client2.shouldReply('lobby kick', '请输入要踢出的玩家编号。')
+    await client2.shouldReply('lobby kick 2', '不能对房主进行此操作。')
+    await client2.shouldNotReply('lobby kick 1')
     await clock.runAllAsync()
     expect(send.mock.calls).to.have.length(3)
     send.mockClear()
-    await client1.shouldReply('room', '你并不在任何房间中。')
-    await client2.shouldReply('room', [
+    await client1.shouldReply('lobby room', '你并不在任何房间中。')
+    await client2.shouldReply('lobby room', [
       '房号：114514',
       '房主：222',
       '成员列表：',
@@ -129,7 +124,7 @@ describe('koishi-plugin-lobby', () => {
       '发送「:内容」可在房间内发言。',
     ].join('\n'))
 
-    await client2.shouldReply('room leave', [
+    await client2.shouldReply('lobby leave', [
       '离开房间前可选择将房间转移给其他人：',
       '    3. 333',
       '请输入玩家编号以转移房主。输入 0 将直接解散房间。输入任何其他内容将取消操作。',
@@ -138,7 +133,7 @@ describe('koishi-plugin-lobby', () => {
     await clock.runAllAsync()
     expect(send.mock.calls).to.have.length(1)
     send.mockClear()
-    await client3.shouldReply('room', [
+    await client3.shouldReply('lobby room', [
       '房号：114514',
       '房主：333',
       '成员列表：',
@@ -146,7 +141,7 @@ describe('koishi-plugin-lobby', () => {
       '发送「:内容」可在房间内发言。',
     ].join('\n'))
 
-    await client3.shouldNotReply('room leave')
+    await client3.shouldNotReply('lobby leave')
     await clock.runAllAsync()
     expect(send.mock.calls).to.have.length(1)
     send.mockClear()

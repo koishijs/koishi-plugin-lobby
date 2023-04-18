@@ -1,4 +1,5 @@
 import { Computed, Context, Dict, h, Schema, Service, Session } from 'koishi'
+import {} from '@koishijs/plugin-help'
 import { Assert } from './assert'
 import { Room } from './room'
 import { Player } from './player'
@@ -43,7 +44,9 @@ class Lobby extends Service {
 
     ctx.private().command('game')
 
-    const room = ctx.private().command('room')
+    const cmd = ctx.private().command('lobby')
+
+    cmd.subcommand('.room')
       .userFields(['id', 'name', 'locale'])
       .action(({ session }) => {
         const player = this.assert.busy(session.user.id)
@@ -63,7 +66,7 @@ class Lobby extends Service {
         return output.join('\n')
       })
 
-    room.subcommand('.create')
+    cmd.subcommand('.create')
       .userFields(['id', 'name', 'locale'])
       .option('capacity', '-c [count:number]')
       .action(({ session, options }) => {
@@ -72,7 +75,7 @@ class Lobby extends Service {
         return session.text('.success', room)
       })
 
-    room.subcommand('.config')
+    cmd.subcommand('.config')
       .userFields(['id', 'name', 'locale'])
       .option('capacity', '-c [count:number]')
       .action(({ session, options }) => {
@@ -81,7 +84,7 @@ class Lobby extends Service {
         return session.text('.success')
       })
 
-    room.subcommand('.join <id:string>')
+    cmd.subcommand('.join <id:string>')
       .userFields(['id', 'name', 'locale'])
       .action(({ session }, id) => {
         this.assert.idle(session.user.id)
@@ -92,7 +95,7 @@ class Lobby extends Service {
         room.join(new Player(session))
       })
 
-    room.subcommand('.leave')
+    cmd.subcommand('.leave')
       .userFields(['id', 'name'])
       .action(async ({ session }) => {
         const player = this.assert.busy(session.user.id)
@@ -119,7 +122,7 @@ class Lobby extends Service {
         return session.text('.success')
       })
 
-    room.subcommand('.kick <...id:number>')
+    cmd.subcommand('.kick <...id:number>')
       .userFields(['id', 'name'])
       .action(({ session }, ...incs) => {
         const player = this.assert.host(session.user.id)
@@ -127,7 +130,7 @@ class Lobby extends Service {
         player.room.kick(incs)
       })
 
-    room.subcommand('.transfer <id:number>')
+    cmd.subcommand('.transfer <id:number>')
       .userFields(['id', 'name'])
       .action(({ session }, inc) => {
         const player = this.assert.host(session.user.id)
@@ -135,21 +138,21 @@ class Lobby extends Service {
         player.room.transfer(inc)
       })
 
-    room.subcommand('.destroy')
+    cmd.subcommand('.destroy')
       .userFields(['id', 'name'])
       .action(({ session }) => {
         const player = this.assert.host(session.user.id)
         player.room.destroy()
       })
 
-    room.subcommand('.start')
+    cmd.subcommand('.start')
       .userFields(['id', 'name'])
       .action(({ session }) => {
         const player = this.assert.host(session.user.id)
         player.room.start()
       })
 
-    room.subcommand('talk <content:text>')
+    cmd.subcommand('talk <content:text>', { hidden: true })
       .userFields(['id', 'name'])
       .action(({ session }, content) => {
         const player = this.assert.busy(session.user.id)

@@ -1,7 +1,9 @@
 commands:
   game:
+    description: 游戏列表
+  lobby:
     description: 游戏大厅
-  room:
+  lobby.room:
     description: 查看房间
     messages:
       overview: |-
@@ -11,22 +13,22 @@ commands:
         {players}
       talk-free: 你发送的所有消息将在房间内广播。
       talk-prefix: 发送「{0}内容」可在房间内发言。
-  room.create:
+  lobby.create:
     description: 创建房间
     options:
       capacity: 最大人数
     messages:
       success: 房间创建成功，编号为 {id}。
-  room.config:
+  lobby.config:
     description: 修改房间设置
     messages:
       success: 设置修改成功！
-  room.join:
+  lobby.join:
     description: 加入房间
     messages:
       success: 加入房间成功！
       full: 该房间人数已满，无法加入。
-  room.leave:
+  lobby.leave:
     description: 离开房间
     messages:
       success: 已成功离开房间。
@@ -35,15 +37,15 @@ commands:
         {players}
         请输入玩家编号以转移房主。输入 0 将直接解散房间。输入任何其他内容将取消操作。
       timeout: 操作超时，已自动取消。
-  room.kick:
+  lobby.kick:
     description: 踢出房间
     messages:
       expect-id: 请输入要踢出的玩家编号。
-  room.transfer:
+  lobby.transfer:
     description: 转移房主
     messages:
       expect-id: 请输入要转移给的玩家编号。
-  room.destroy:
+  lobby.destroy:
     description: 解散房间
   talk:
     description: 房间内发言

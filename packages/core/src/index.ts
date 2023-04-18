@@ -44,9 +44,23 @@ class Lobby extends Service {
 
     ctx.private().command('game')
 
-    const cmd = ctx.private().command('lobby')
+    ctx.command('lobby')
+      .action(({ session }) => {
+        const output = Object
+          .values(this.rooms)
+          .filter(room => !room.options.private)
+          .sort((a, b) => b.id.localeCompare(a.id))
+          .map(room => session.text('.room', room))
+        if (output.length) {
+          output.unshift(session.text('.header'))
+        } else {
+          output.push(session.text('.empty'))
+        }
+        output.push(session.text('.footer'))
+        return output.join('\n')
+      })
 
-    cmd.subcommand('.room')
+    ctx.private().command('lobby.room')
       .userFields(['id', 'name', 'locale'])
       .action(({ session }) => {
         const player = this.assert.busy(session.user.id)
@@ -66,9 +80,9 @@ class Lobby extends Service {
         return output.join('\n')
       })
 
-    cmd.subcommand('.create')
+    ctx.private().command('lobby.create')
       .userFields(['id', 'name', 'locale'])
-      .option('capacity', '-c [count:number]')
+      .option('capacity', '-c [count:number]', { fallback: 10 })
       .option('private', '-p')
       .option('private', '-P, --public', { value: false })
       .action(({ session, options }) => {
@@ -77,7 +91,7 @@ class Lobby extends Service {
         return session.text('.success', room)
       })
 
-    cmd.subcommand('.config')
+    ctx.private().command('lobby.config')
       .userFields(['id', 'name', 'locale'])
       .option('capacity', '-c [count:number]')
       .option('private', '-p')
@@ -88,7 +102,7 @@ class Lobby extends Service {
         return session.text('.success')
       })
 
-    cmd.subcommand('.join <id:string>')
+    ctx.private().command('lobby.join <id:string>')
       .userFields(['id', 'name', 'locale'])
       .action(({ session }, id) => {
         this.assert.idle(session.user.id)
@@ -99,7 +113,7 @@ class Lobby extends Service {
         room.join(new Player(session))
       })
 
-    cmd.subcommand('.leave')
+    ctx.private().command('lobby.leave')
       .userFields(['id', 'name'])
       .action(async ({ session }) => {
         const player = this.assert.busy(session.user.id)
@@ -126,7 +140,7 @@ class Lobby extends Service {
         return session.text('.success')
       })
 
-    cmd.subcommand('.kick <...id:number>')
+    ctx.private().command('lobby.kick <...id:number>')
       .userFields(['id', 'name'])
       .action(({ session }, ...incs) => {
         const player = this.assert.host(session.user.id)
@@ -134,7 +148,7 @@ class Lobby extends Service {
         player.room.kick(incs)
       })
 
-    cmd.subcommand('.transfer <id:number>')
+    ctx.private().command('lobby.transfer <id:number>')
       .userFields(['id', 'name'])
       .action(({ session }, inc) => {
         const player = this.assert.host(session.user.id)
@@ -142,21 +156,21 @@ class Lobby extends Service {
         player.room.transfer(inc)
       })
 
-    cmd.subcommand('.destroy')
+    ctx.private().command('lobby.destroy')
       .userFields(['id', 'name'])
       .action(({ session }) => {
         const player = this.assert.host(session.user.id)
         player.room.destroy()
       })
 
-    cmd.subcommand('.start')
+    ctx.private().command('lobby.start')
       .userFields(['id', 'name'])
       .action(({ session }) => {
         const player = this.assert.host(session.user.id)
         player.room.start()
       })
 
-    cmd.subcommand('talk <content:text>', { hidden: true })
+    ctx.private().command('lobby/talk <content:text>', { hidden: true })
       .userFields(['id', 'name'])
       .action(({ session }, content) => {
         const player = this.assert.busy(session.user.id)

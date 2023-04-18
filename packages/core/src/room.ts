@@ -67,6 +67,10 @@ export class Room {
     return Object.keys(this.players).length
   }
 
+  get status(): Room.Status {
+    return this.game ? 'playing' : 'waiting'
+  }
+
   listPlayers(ignoreHost = false) {
     return Object.values(this.players)
       .filter(player => !ignoreHost || player !== this.host)
@@ -177,6 +181,8 @@ export class Room {
 }
 
 export namespace Room {
+  export type Status = 'playing' | 'waiting'
+
   export const enum SpeechMode {
     free,
     command,

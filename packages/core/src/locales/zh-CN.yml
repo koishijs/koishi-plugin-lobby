@@ -60,6 +60,7 @@ lobby:
     player-not-found: 房间中没有编号为 {0} 的玩家。
     expect-host: 只有房主可以进行此操作。
     target-host: 不能对房主进行此操作。
+    game-not-found: 当前房间没有设置游戏内容。
   system:
     join: 系统消息：{0} 加入了房间。
     leave: 系统消息：{0} 离开了房间。
@@ -69,7 +70,8 @@ lobby:
     kick-self: 系统消息：你被房主踢出了房间。
     destroy: 系统消息：房间已解散。
     start: 系统消息：游戏开始。
-    end: 系统消息：游戏结束。
+    confirm: 请输入句号进行确认，待所有玩家确认后游戏将正式开始。
+    cancel: 系统消息：由于有玩家未确认，游戏已自动取消。
     terminated: 系统消息：游戏因为异常而中止。
   talk:
     player: '{1}：{0}'

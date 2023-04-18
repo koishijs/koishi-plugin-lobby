@@ -5,6 +5,7 @@ commands:
       rounds: 获胜局数
 
 lobby.game.rps:
+  invalid-player-count: 游戏人数必须为 2 人。
   input: |-
     第 {0} 轮
     请输入字母进行选择：
@@ -20,9 +21,9 @@ lobby.game.rps:
   timeout: '{0} 没有在规定时间内出招'
   result-0: |-
     {0}，{1}，此轮没有分出胜负。
-    {2}
+    <p>{2}</p>
   result-1: |-
     {0}，{1}，{2} 获胜！
-    {3}
+    <p>{3}</p>
   score: '当前比分为：{0}：{1} 分；{2}：{3} 分。'
   finish: 游戏结束，{0} 获胜！

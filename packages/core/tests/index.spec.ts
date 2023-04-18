@@ -28,7 +28,7 @@ let clock: InstalledClock
 
 before(async () => {
   logger.level = 3
-  clock = install({ shouldAdvanceTime: true, advanceTimeDelta: 5 })
+  clock = install()
   await app.start()
   await app.mock.initUser('514')
 })
@@ -54,6 +54,7 @@ describe('koishi-plugin-lobby', () => {
 
     await client2.shouldReply('lobby join 1919810', '房间 1919810 不存在。')
     await client2.shouldNotReply('lobby join 114514')
+    await clock.runAllAsync()
     expect(send.mock.calls).to.have.length(2)
     send.mockClear()
     await client2.shouldReply('lobby room', [

@@ -6,5 +6,7 @@ export abstract class Game<T = any> {
     room.game = this
   }
 
+  abstract check(): Promise<void>
+
   abstract start(): Promise<void>
 }

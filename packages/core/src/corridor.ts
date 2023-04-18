@@ -13,7 +13,7 @@ export abstract class Corridor {
       .userFields(['id'])
       .action(async ({ session, options }) => {
         if (!ctx.lobby.players[session.user.id]) {
-          await session.execute('room.create')
+          await session.execute('lobby.create')
         }
         const player = ctx.lobby.assert.host(session.user.id)
         Reflect.construct(this.factory, [player.room, this, options])

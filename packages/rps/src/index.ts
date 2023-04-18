@@ -4,6 +4,12 @@ import { Corridor, Game, Player } from 'koishi-plugin-lobby'
 class RPSGame extends Game<RPSGame.Options> {
   private round = 0
 
+  async check() {
+    if (Object.values(this.room.players).length !== 2) {
+      throw new Error('lobby.game.rps.invalid-player-count')
+    }
+  }
+
   private formatChoice(choice: string) {
     return h('i18n', { path: `lobby.game.rps.choice.${choice}` })
   }

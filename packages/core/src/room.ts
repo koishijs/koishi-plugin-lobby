@@ -37,9 +37,9 @@ export class Room {
     }))
   }
 
-  prompt(players: Player[], accept: (session: Session, player: Player) => string, timeout: number) {
-    return new Promise<Map<Player, string>>((resolve, reject) => {
-      const result = new Map<Player, string>()
+  prompt<T>(players: Player[], accept: (session: Session, player: Player) => T, timeout: number) {
+    return new Promise<Map<Player, T>>((resolve, reject) => {
+      const result = new Map<Player, T>()
       const dispose1 = this.lobby.ctx.middleware((session, next) => {
         if (session.subtype !== 'private') return next()
         for (const player of players) {
@@ -148,18 +148,27 @@ export class Room {
   }
 
   async start() {
-    this.broadcast('system.start')
+    if (!this.game) throw new SessionError('lobby.exception.game-not-found')
+    await this.game.check()
+    await this.broadcast('system.confirm')
+    const result = await this.prompt(Object.values(this.players), (session) => {
+      const content = session.content.trim()
+      if (!['.', '。'].includes(content)) return
+      return content
+    }, 60000)
+    if (result.size !== this.size) {
+      return this.broadcast('system.cancel')
+    }
+    await this.broadcast('system.start')
     logger.debug(`game in ${this} was started`)
     try {
       await this.game.start()
-      this.broadcast('system.end')
       logger.debug(`game in ${this} was finished`)
     } catch (error) {
       logger.debug(`game in ${this} was terminated`)
       logger.debug(error.stack)
-      this.broadcast('system.terminated')
+      await this.broadcast('system.terminated')
     }
-    this.game = null
   }
 
   toString() {

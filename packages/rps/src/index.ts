@@ -28,7 +28,11 @@ class RPSGame extends Game<RPSGame.Options> {
       const choices = players.map(p => results.get(p))
       const outputs = players.map(p => this.formatOutput(results.get(p), p.name))
       if (choices[0] === choices[1]) {
-        await this.room.broadcast('game.rps.result-0', outputs)
+        const scoreText = h('i18n', { path: 'lobby.game.rps.score' }, [
+          players[0].name, scores.get(players[0]) + '',
+          players[1].name, scores.get(players[1]) + '',
+        ])
+        await this.room.broadcast('game.rps.result-0', [...outputs, scoreText])
       } else {
         let winner: Player
         if (!choices[0]) {
@@ -41,9 +45,13 @@ class RPSGame extends Game<RPSGame.Options> {
             || choices[0] === 's' && choices[1] === 'p'
             ? players[0] : players[1]
         }
-        await this.room.broadcast('game.rps.result-1', [...outputs, winner.name])
         const score = scores.get(winner) + 1
         scores.set(winner, score)
+        const scoreText = h('i18n', { path: 'lobby.game.rps.score' }, [
+          players[0].name, scores.get(players[0]) + '',
+          players[1].name, scores.get(players[1]) + '',
+        ])
+        await this.room.broadcast('game.rps.result-1', [...outputs, winner.name, scoreText])
         if (score >= this.options.rounds) {
           await this.room.broadcast('game.rps.finish', [winner.name])
           break

@@ -17,10 +17,16 @@ commands:
     description: 创建房间
     options:
       capacity: 最大人数
+      private: 私密房间
+      private.false: 公开房间
     messages:
       success: 房间创建成功，编号为 {id}。
   lobby.config:
-    description: 修改房间设置
+    description: 房间设置
+    options:
+      capacity: 最大人数
+      private: 私密房间
+      private.false: 公开房间
     messages:
       success: 设置修改成功！
   lobby.join:
@@ -47,6 +53,8 @@ commands:
       expect-id: 请输入要转移给的玩家编号。
   lobby.destroy:
     description: 解散房间
+  lobby.start:
+    description: 开始游戏
   talk:
     description: 房间内发言
     messages:
@@ -70,6 +78,7 @@ lobby:
     kick-self: 系统消息：你被房主踢出了房间。
     destroy: 系统消息：房间已解散。
     start: 系统消息：游戏开始。
+    game: 系统消息：房间已设置游戏为 {0}。
     confirm: 请输入句号进行确认，待所有玩家确认后游戏将正式开始。
     cancel: 系统消息：由于有玩家未确认，游戏已自动取消。
     terminated: 系统消息：游戏因为异常而中止。

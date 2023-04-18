@@ -2,7 +2,7 @@ import { Context, h, Schema } from 'koishi'
 import { Corridor, Game, Player } from 'koishi-plugin-lobby'
 
 class RPSGame extends Game<RPSGame.Options> {
-  private round = 0
+  private round: number
 
   async check() {
     if (Object.values(this.room.players).length !== 2) {
@@ -21,6 +21,7 @@ class RPSGame extends Game<RPSGame.Options> {
   }
 
   async start() {
+    this.round = 0
     const players = Object.values(this.room.players)
     const scores = new Map(players.map(p => [p, 0]))
     while (true) {
@@ -30,7 +31,7 @@ class RPSGame extends Game<RPSGame.Options> {
         if (content.length !== 1 || !'rps'.includes(content)) return
         player.send(h('i18n', { path: 'lobby.game.rps.accepted' }, [this.formatChoice(content)]))
         return content
-      }, 30000)
+      }, this.options.timeout)
       const choices = players.map(p => results.get(p))
       const outputs = players.map(p => this.formatOutput(results.get(p), p.name))
       if (choices[0] === choices[1]) {
@@ -70,6 +71,7 @@ class RPSGame extends Game<RPSGame.Options> {
 namespace RPSGame {
   export interface Options {
     rounds: number
+    timeout: number
   }
 }
 
@@ -81,16 +83,19 @@ class RPSCorridor extends Corridor {
     ctx.i18n.define('zh', require('./locales/zh-CN'))
 
     this.cmd.option('rounds', '-r <rounds:number>', { fallback: config.rounds })
+    this.cmd.option('timeout', '-t <timeout:number>', { fallback: config.timeout })
   }
 }
 
 namespace RPSCorridor {
   export interface Config {
     rounds: number
+    timeout: number
   }
 
   export const Config: Schema<Config> = Schema.object({
     rounds: Schema.number().description('默认的获胜局数。').default(3),
+    timeout: Schema.number().description('默认的出招限时。').default(30000),
   })
 }
 

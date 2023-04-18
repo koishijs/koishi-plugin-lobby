@@ -69,6 +69,8 @@ class Lobby extends Service {
     cmd.subcommand('.create')
       .userFields(['id', 'name', 'locale'])
       .option('capacity', '-c [count:number]')
+      .option('private', '-p')
+      .option('private', '-P, --public', { value: false })
       .action(({ session, options }) => {
         this.assert.idle(session.user.id)
         const room = new Room(new Player(session), options)
@@ -78,6 +80,8 @@ class Lobby extends Service {
     cmd.subcommand('.config')
       .userFields(['id', 'name', 'locale'])
       .option('capacity', '-c [count:number]')
+      .option('private', '-p')
+      .option('private', '-P, --public', { value: false })
       .action(({ session, options }) => {
         const player = this.assert.host(session.user.id)
         Object.assign(player.room.options, options)

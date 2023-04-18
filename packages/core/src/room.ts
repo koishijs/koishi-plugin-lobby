@@ -185,5 +185,6 @@ export namespace Room {
 
   export interface Options {
     capacity?: number
+    private?: boolean
   }
 }

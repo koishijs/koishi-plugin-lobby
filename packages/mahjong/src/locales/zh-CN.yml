@@ -1,0 +1,6 @@
+commands:
+  mahjong:
+    description: 麻将
+
+lobby.game.mahjong:
+  invalid-player-count: 游戏人数必须为 4 人。

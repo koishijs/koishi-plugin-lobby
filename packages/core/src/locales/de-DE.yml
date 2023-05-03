@@ -1,0 +1,94 @@
+commands:
+  game:
+    description: 游戏列表
+  lobby:
+    description: 游戏大厅
+    messages:
+      empty: 当前没有房间。
+      status:
+        playing: 游戏中
+        waiting: 等待中
+      header: 房号  人数  房主  状态
+      room: <p>{id}  {size}/{options.capacity}  {host.name}  <i18n path={"commands.lobby.messages.status." + status}/></p>
+      footer: 私聊机器人输入「lobby create」创建房间，输入「lobby join 房间号」加入房间。
+  lobby.room:
+    description: 查看房间
+    messages:
+      overview: |-
+        房号：{id}
+        房主：{host}
+        成员列表：
+        {players}
+      talk-free: 你发送的所有消息将在房间内广播。
+      talk-prefix: 发送「{0}内容」可在房间内发言。
+  lobby.create:
+    description: 创建房间
+    options:
+      capacity: 最大人数
+      private: 私密房间
+      private.false: 公开房间
+    messages:
+      success: 房间创建成功，编号为 {id}。
+  lobby.config:
+    description: 房间设置
+    options:
+      capacity: 最大人数
+      private: 私密房间
+      private.false: 公开房间
+    messages:
+      success: 设置修改成功！
+  lobby.join:
+    description: 加入房间
+    messages:
+      success: 加入房间成功！
+      full: 该房间人数已满，无法加入。
+  lobby.leave:
+    description: 离开房间
+    messages:
+      success: 已成功离开房间。
+      transfer-or-destroy: |-
+        离开房间前可选择将房间转移给其他人：
+        {players}
+        请输入玩家编号以转移房主。输入 0 将直接解散房间。输入任何其他内容将取消操作。
+      timeout: 操作超时，已自动取消。
+  lobby.kick:
+    description: 踢出房间
+    messages:
+      expect-id: 请输入要踢出的玩家编号。
+  lobby.transfer:
+    description: 转移房主
+    messages:
+      expect-id: 请输入要转移给的玩家编号。
+  lobby.destroy:
+    description: 解散房间
+  lobby.start:
+    description: 开始游戏
+  talk:
+    description: 房间内发言
+    messages:
+      disabled: 当前阶段房间内禁止发言。
+      expect-content: 请输入要发送的内容。
+lobby:
+  exception:
+    already-in-room: 你已在房间 {id} 中。输入「room leave」以离开当前房间。
+    not-in-room: 你并不在任何房间中。
+    room-not-found: 房间 {0} 不存在。
+    player-not-found: 房间中没有编号为 {0} 的玩家。
+    expect-host: 只有房主可以进行此操作。
+    target-host: 不能对房主进行此操作。
+    game-not-found: 当前房间没有设置游戏内容。
+  system:
+    join: 系统消息：{0} 加入了房间。
+    leave: 系统消息：{0} 离开了房间。
+    leave-transfer: 系统消息：{1} 离开了房间，并将房主转移给了 {0}。
+    transfer: 系统消息：{1} 将房主转移给了 {0}。
+    kick: 系统消息：{0} 被房主踢出了房间。
+    kick-self: 系统消息：你被房主踢出了房间。
+    destroy: 系统消息：房间已解散。
+    start: 系统消息：游戏开始。
+    game: 系统消息：房间已设置游戏为 {0}。
+    confirm: 请输入句号进行确认，待所有玩家确认后游戏将正式开始。
+    cancel: 系统消息：由于有玩家未确认，游戏已自动取消。
+    terminated: 系统消息：游戏因为异常而中止。
+  talk:
+    player: '{1}：{0}'

@@ -33,7 +33,7 @@ export class Room {
     const message: Message = { type, param }
     this.messages.push(message)
     await Promise.all(Object.values(this.players).map(player => {
-      return player.send(h('i18n', { path: 'lobby.' + type }, param))
+      return player.send(h.i18n('lobby.' + type, param))
     }))
   }
 
@@ -117,7 +117,7 @@ export class Room {
     const players = this.getPlayers(ids)
     for (const player of players) {
       this._leave(player)
-      player.send(h('i18n', { path: 'lobby.system.kick-self' }, [this.host.name]))
+      player.send(h.i18n('lobby.system.kick-self', [this.host.name]))
     }
     this.broadcast('system.kick', [players.map(p => p.name).join(', '), this.host.name])
   }

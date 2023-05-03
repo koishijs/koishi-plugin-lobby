@@ -9,12 +9,6 @@ export default defineConfig({
     'zh-CN': require('./zh-CN'),
   },
 
-  head: [
-    ['link', { rel: 'icon', href: 'https://koishi.chat/logo.png' }],
-    ['link', { rel: 'manifest', href: '/zh-CN/manifest.json' }],
-    ['meta', { name: 'theme-color', content: '#5546a3' }],
-  ],
-
   themeConfig: {
     indexName: 'lobby',
 

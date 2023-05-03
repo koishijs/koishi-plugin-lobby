@@ -11,13 +11,13 @@ class RPSGame extends Game<RPSGame.Options> {
   }
 
   private formatChoice(choice: string) {
-    return h('i18n', { path: `lobby.game.rps.choice.${choice}` })
+    return h.i18n(`lobby.game.rps.choice.${choice}`)
   }
 
   private formatOutput(choice: string, name: string) {
     return choice
-      ? h('i18n', { path: 'lobby.game.rps.output' }, [name, this.formatChoice(choice)])
-      : h('i18n', { path: 'lobby.game.rps.timeout' }, [name])
+      ? h.i18n('lobby.game.rps.output', [name, this.formatChoice(choice)])
+      : h.i18n('lobby.game.rps.timeout', [name])
   }
 
   async start() {
@@ -29,13 +29,13 @@ class RPSGame extends Game<RPSGame.Options> {
       const results = await this.room.prompt(players, (session, player) => {
         const content = session.content.trim().toLowerCase()
         if (content.length !== 1 || !'rps'.includes(content)) return
-        player.send(h('i18n', { path: 'lobby.game.rps.accepted' }, [this.formatChoice(content)]))
+        player.send(h.i18n('lobby.game.rps.accepted', [this.formatChoice(content)]))
         return content
       }, this.options.timeout)
       const choices = players.map(p => results.get(p))
       const outputs = players.map(p => this.formatOutput(results.get(p), p.name))
       if (choices[0] === choices[1]) {
-        const scoreText = h('i18n', { path: 'lobby.game.rps.score' }, [
+        const scoreText = h.i18n('lobby.game.rps.score', [
           players[0].name, scores.get(players[0]) + '',
           players[1].name, scores.get(players[1]) + '',
         ])
@@ -54,7 +54,7 @@ class RPSGame extends Game<RPSGame.Options> {
         }
         const score = scores.get(winner) + 1
         scores.set(winner, score)
-        const scoreText = h('i18n', { path: 'lobby.game.rps.score' }, [
+        const scoreText = h.i18n('lobby.game.rps.score', [
           players[0].name, scores.get(players[0]) + '',
           players[1].name, scores.get(players[1]) + '',
         ])

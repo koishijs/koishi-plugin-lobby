@@ -41,13 +41,13 @@
     "mahjong"
   ],
   "peerDependencies": {
-    "koishi": "^4.12.5",
+    "koishi": "^4.12.7",
     "koishi-plugin-lobby": "^0.2.3"
   },
   "devDependencies": {
-    "@types/node": "^18.15.3",
+    "@types/node": "^18.16.0",
     "atsc": "^1.2.2",
-    "koishi": "^4.12.5",
-    "typescript": "^4.9.5"
+    "koishi": "^4.12.7",
+    "typescript": "^5.0.4"
   }
 }

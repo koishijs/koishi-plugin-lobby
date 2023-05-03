@@ -1,5 +1,10 @@
 {
   "description": "基于 Koishi 的游戏大厅服务",
+  "head": [
+    ["link", { "rel": "icon", "href": "https://koishi.chat/logo.png" }],
+    ["link", { "rel": "manifest", "href": "/zh-CN/manifest.json" }],
+    ["meta", { "name": "theme-color", "content": "#5546a3" }]
+  ],
   "themeConfig": {
     "editLink": {
       "text": "在 GitHub 编辑此页面",

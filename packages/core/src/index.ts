@@ -173,11 +173,12 @@ class Lobby extends Service {
     ctx.private().command('lobby/talk <content:text>', { hidden: true })
       .userFields(['id', 'name'])
       .action(({ session }, content) => {
+        if (!content) return session.text('.expect-content')
         const player = this.assert.busy(session.user.id)
         if (player.room.speech === Room.SpeechMode.disabled) {
           return session.text('.disabled')
         }
-        player.talk(content)
+        return player.room.broadcast('talk.player', [content, player.name])
       })
   }
 

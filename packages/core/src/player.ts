@@ -40,11 +40,6 @@ export class Player {
     })
   }
 
-  talk(content: string, type = 'player') {
-    if (!content) return
-    this.room.broadcast('talk.' + type, [content, this.name])
-  }
-
   toString() {
     return `player ${this.name}`
   }

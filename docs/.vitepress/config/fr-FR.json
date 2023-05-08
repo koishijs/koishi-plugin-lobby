@@ -1,41 +1,41 @@
 {
-  "description": "基于 Koishi 的游戏大厅服务",
+  "description": "",
   "head": [
     [
-      "link",
+      "",
       {
-        "rel": "icon",
-        "href": "https://koishi.chat/logo.png"
+        "rel": "",
+        "href": ""
       }
     ],
     [
-      "link",
+      "",
       {
-        "rel": "manifest",
-        "href": "/zh-CN/manifest.json"
+        "rel": "",
+        "href": ""
       }
     ],
     [
-      "meta",
+      "",
       {
-        "name": "theme-color",
-        "content": "#5546a3"
+        "name": "",
+        "content": ""
       }
     ]
   ],
   "themeConfig": {
     "editLink": {
       "text": "Traduire cette page sur Crowdin",
-      "pattern": "https://github.com/koishijs/koishi-plugin-lobby/edit/main/docs/:path"
+      "pattern": ""
     },
     "sidebar": {
       "/": [
         {
-          "text": "指南",
+          "text": "",
           "items": [
             {
-              "text": "介绍",
-              "link": "/"
+              "text": "",
+              "link": ""
             }
           ]
         },
@@ -43,21 +43,21 @@
           "text": "plugin",
           "items": [
             {
-              "text": "剪刀石头布 (RPS)",
-              "link": "/plugins/rps.md"
+              "text": "",
+              "link": ""
             }
           ]
         },
         {
-          "text": "更多",
+          "text": "",
           "items": [
             {
-              "text": "Koishi 官网",
-              "link": "https://koishi.chat"
+              "text": "",
+              "link": ""
             },
             {
-              "text": "支持作者",
-              "link": "https://afdian.net/a/shigma"
+              "text": "",
+              "link": ""
             }
           ]
         }

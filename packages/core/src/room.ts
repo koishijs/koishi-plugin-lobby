@@ -1,7 +1,9 @@
 import { Dict, h, Logger, Random, Session, SessionError } from 'koishi'
 import { Player } from './player'
 import { Game } from './game'
+import { Task } from './task'
 import Lobby from '.'
+import { Group } from './group'
 
 const logger = new Logger('lobby')
 
@@ -10,7 +12,7 @@ export interface Message {
   param: any[]
 }
 
-export class Room {
+export class Room extends Group {
   private inc = 0
 
   id: string
@@ -22,6 +24,8 @@ export class Room {
   speech: Room.SpeechMode = Room.SpeechMode.command
 
   constructor(public host: Player, public options: Room.Options) {
+    super(null, () => Object.values(this.players))
+    this.room = this
     this.name = this.id = Random.id(6, 10)
     this.lobby = host.lobby
     this.lobby.rooms[this.id] = this
@@ -29,38 +33,28 @@ export class Room {
     this._join(host)
   }
 
-  async broadcast(type: string, param = []) {
-    const message: Message = { type, param }
-    this.messages.push(message)
-    await Promise.all(Object.values(this.players).map(player => {
-      return player.send(h.i18n('lobby.' + type, param))
-    }))
+  group(predicate: Player[]) {
+    return new Group(this, () => predicate)
   }
 
-  prompt<T>(players: Player[], accept: (session: Session, player: Player) => T, timeout: number) {
-    return new Promise<Map<Player, T>>((resolve, reject) => {
-      const result = new Map<Player, T>()
-      const dispose1 = this.lobby.ctx.middleware((session, next) => {
-        if (session.subtype !== 'private') return next()
-        for (const player of players) {
-          if (player.userId !== session.userId || player.platform !== session.platform) continue
-          const content = accept(session, player)
-          if (typeof content !== 'string') return next()
-          result.set(player, content)
-          if (result.size === players.length) _resolve()
-          return
-        }
-        return next()
-      })
-      const dispose2 = this.lobby.ctx.setTimeout(() => {
-        _resolve()
-      }, timeout)
-      const _resolve = () => {
-        resolve(result)
-        dispose1()
-        dispose2()
-      }
-    })
+  task() {
+    return new Task()
+  }
+
+  async prompt<T>(players: Player[], accept: (session: Session, player: Player) => T, timeout: number) {
+    const result = new Map<Player, T>()
+    const task = new Task()
+    task.timeout(timeout)
+    for (const player of players) {
+      task.defer(player.prompt((session, next) => {
+        const content = accept(session, player)
+        if (!content) return next()
+        result.set(player, content)
+        if (result.size === players.length) task.done()
+      }))
+    }
+    await task.execute()
+    return result
   }
 
   get size() {
@@ -78,7 +72,7 @@ export class Room {
       .join('\n')
   }
 
-  getPlayers(incs: number[]) {
+  getByInc(incs: number[]) {
     const notFound: number[] = []
     const result: Player[] = []
     for (const inc of incs) {
@@ -114,7 +108,7 @@ export class Room {
   }
 
   kick(ids: number[]) {
-    const players = this.getPlayers(ids)
+    const players = this.getByInc(ids)
     for (const player of players) {
       this._leave(player)
       player.send(h.i18n('lobby.system.kick-self', [this.host.name]))
@@ -133,7 +127,7 @@ export class Room {
 
   transfer(id: number, leave = false) {
     const oldHost = this.host
-    this.host = this.getPlayers([id])[0]
+    this.host = this.getByInc([id])[0]
     if (leave) {
       this._leave(oldHost)
       this.broadcast('system.leave-transfer', [this.host.name, oldHost.name])
@@ -156,9 +150,7 @@ export class Room {
     await this.game.check()
     await this.broadcast('system.confirm')
     const result = await this.prompt(Object.values(this.players), (session) => {
-      const content = session.content.trim()
-      if (!['.', '。'].includes(content)) return
-      return content
+      return session.content.trim()
     }, 60000)
     if (result.size !== this.size) {
       return this.broadcast('system.cancel')

@@ -1,4 +1,4 @@
-import { Bot, Fragment, Session, sleep } from 'koishi'
+import { Bot, Fragment, Middleware, Session, sleep } from 'koishi'
 import { Room } from './room'
 import Lobby from '.'
 
@@ -12,6 +12,7 @@ export class Player {
   platform: string
   room: Room
   lobby: Lobby
+  player = this
 
   private sendTask = Promise.resolve()
 
@@ -26,6 +27,10 @@ export class Player {
     this.lobby.players[this.id] = this
   }
 
+  flush() {
+    return this.sendTask
+  }
+
   send(content: Fragment) {
     const session = this.bot.session({
       subtype: 'private',
@@ -38,6 +43,14 @@ export class Player {
       await this.bot.sendPrivateMessage(this.userId, content, { session })
       await sleep(this.lobby.config.delay.message)
     })
+  }
+
+  prompt(middleware: Middleware) {
+    return this.lobby.ctx.middleware((session, next) => {
+      if (session.subtype !== 'private') return next()
+      if (session.userId !== this.userId || session.platform !== this.platform) return next()
+      return middleware(session, next)
+    }, true)
   }
 
   toString() {

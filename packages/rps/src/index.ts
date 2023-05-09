@@ -7,7 +7,7 @@ class RPSGame extends Game<RPSGame.Options> {
   private round: number
 
   async check() {
-    if (Object.values(this.room.players).length !== 2) {
+    if (this.room.size !== 2) {
       throw new Error('lobby.game.rps.invalid-player-count')
     }
   }

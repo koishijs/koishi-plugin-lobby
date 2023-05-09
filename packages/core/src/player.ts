@@ -13,6 +13,7 @@ export class Player {
   room: Room
   lobby: Lobby
   player = this
+  allowSpeech: boolean
 
   private sendTask = Promise.resolve()
 

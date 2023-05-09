@@ -17,7 +17,7 @@ export class Room extends Group {
   players: Dict<Player> = Object.create(null)
   messages: h[] = []
   game: Game
-  speech: Room.SpeechMode = Room.SpeechMode.command
+  allowSpeech = true
 
   constructor(public host: Player, public options: Room.Options) {
     super(null, () => true)
@@ -127,6 +127,7 @@ export class Room extends Group {
       throw new SessionError('lobby.system.cancel')
     }
     logger.debug(`game in ${this} was started`)
+    const oldAllowSpeech = this.allowSpeech
     try {
       await this.game.start()
       logger.debug(`game in ${this} was finished`)
@@ -134,6 +135,8 @@ export class Room extends Group {
       logger.debug(`game in ${this} was terminated`)
       logger.debug(error.stack)
       await this.broadcast(t('terminated'))
+    } finally {
+      this.allowSpeech = oldAllowSpeech
     }
   }
 
@@ -144,12 +147,6 @@ export class Room extends Group {
 
 export namespace Room {
   export type Status = 'playing' | 'waiting'
-
-  export const enum SpeechMode {
-    free,
-    command,
-    disabled,
-  }
 
   export interface Options {
     capacity?: number

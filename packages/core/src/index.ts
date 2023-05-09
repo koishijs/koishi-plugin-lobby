@@ -33,7 +33,7 @@ class Lobby extends Service {
 
     ctx.private().middleware((session, next) => {
       const player = this.players[session.user['id']]
-      if (player?.room.speech === Room.SpeechMode.disabled) return next()
+      if (!player) return next()
       const content = this._stripPrefix(session)
       if (!content) return next()
       return session.execute({
@@ -70,7 +70,7 @@ class Lobby extends Service {
           host: player.room.host.name,
           players: player.room.listPlayers(),
         })]
-        if (player.room.speech !== Room.SpeechMode.disabled) {
+        if (player.room.allowSpeech) {
           const prefix = this._resolvePrefix(session)?.[0]
           if (prefix) {
             output.push(session.text('.talk-prefix', [prefix]))
@@ -176,7 +176,7 @@ class Lobby extends Service {
       .action(({ session }, content) => {
         if (!content) return session.text('.expect-content')
         const player = this.assert.busy(session.user.id)
-        if (player.room.speech === Room.SpeechMode.disabled) {
+        if (!player.room.allowSpeech) {
           return session.text('.disabled')
         }
         return player.room.broadcast(h.i18n('lobby.talk.player', [content, player.name]))

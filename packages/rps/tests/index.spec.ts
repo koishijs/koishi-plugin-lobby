@@ -45,7 +45,7 @@ describe('koishi-plugin-rps', () => {
     await client1.shouldReply('rps', '房间创建成功，编号为 114514。')
     await client2.shouldNotReply('lobby join 114514')
     await clock.runAllAsync()
-    expect(send.mock.calls).to.have.length(2)
+    expect(send.mock.calls).to.have.length(3)
     send.mockClear()
     await client1.shouldNotReply('rps')
     await client1.shouldNotReply('lobby start')

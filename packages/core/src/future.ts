@@ -1,4 +1,4 @@
-export class Task {
+export class Future {
   private disposables: (() => void)[] = []
   private resolve: () => void
   private promise = new Promise<void>((resolve) => {
@@ -22,4 +22,6 @@ export class Task {
   execute() {
     return this.promise
   }
+
+  static wrap() {}
 }

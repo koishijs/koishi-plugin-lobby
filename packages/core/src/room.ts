@@ -1,7 +1,7 @@
 import { Dict, h, Logger, Random, Session, SessionError } from 'koishi'
 import { Player } from './player'
 import { Game } from './game'
-import { Task } from './task'
+import { Future } from './future'
 import Lobby from '.'
 import { Group } from './group'
 
@@ -24,7 +24,7 @@ export class Room extends Group {
   speech: Room.SpeechMode = Room.SpeechMode.command
 
   constructor(public host: Player, public options: Room.Options) {
-    super(null, () => Object.values(this.players))
+    super(null, () => true)
     this.room = this
     this.name = this.id = Random.id(6, 10)
     this.lobby = host.lobby
@@ -33,20 +33,20 @@ export class Room extends Group {
     this._join(host)
   }
 
-  group(predicate: Player[]) {
-    return new Group(this, () => predicate)
+  group(predicate: (player: Player) => boolean) {
+    return new Group(this, predicate)
   }
 
   task() {
-    return new Task()
+    return new Future()
   }
 
   async prompt<T>(players: Player[], accept: (session: Session, player: Player) => T, timeout: number) {
     const result = new Map<Player, T>()
-    const task = new Task()
+    const task = new Future()
     task.timeout(timeout)
     for (const player of players) {
-      task.defer(player.prompt((session, next) => {
+      task.defer(player.middleware((session, next) => {
         const content = accept(session, player)
         if (!content) return next()
         result.set(player, content)

@@ -6,7 +6,9 @@ import { Player } from './player'
 import { Corridor } from './corridor'
 
 export * from './corridor'
+export * from './future'
 export * from './game'
+export * from './group'
 export * from './player'
 export * from './room'
 

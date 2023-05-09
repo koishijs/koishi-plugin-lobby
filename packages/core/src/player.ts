@@ -45,7 +45,7 @@ export class Player {
     })
   }
 
-  prompt(middleware: Middleware) {
+  middleware(middleware: Middleware) {
     return this.lobby.ctx.middleware((session, next) => {
       if (session.subtype !== 'private') return next()
       if (session.userId !== this.userId || session.platform !== this.platform) return next()

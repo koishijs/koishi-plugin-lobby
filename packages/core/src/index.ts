@@ -179,7 +179,7 @@ class Lobby extends Service {
         if (player.room.speech === Room.SpeechMode.disabled) {
           return session.text('.disabled')
         }
-        return player.room.broadcast('talk.player', [content, player.name])
+        return player.room.broadcast(h.i18n('lobby.talk.player', [content, player.name]))
       })
   }
 

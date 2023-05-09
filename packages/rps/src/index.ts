@@ -1,6 +1,8 @@
 import { Context, h, Schema } from 'koishi'
 import { Corridor, Game, Player } from 'koishi-plugin-lobby'
 
+const t = (path: string, param?: any) => h.i18n('lobby.game.rps.' + path, param)
+
 class RPSGame extends Game<RPSGame.Options> {
   private round: number
 
@@ -11,13 +13,13 @@ class RPSGame extends Game<RPSGame.Options> {
   }
 
   private formatChoice(choice: string) {
-    return h.i18n(`lobby.game.rps.choice.${choice}`)
+    return t(`choice.${choice}`)
   }
 
   private formatOutput(choice: string, name: string) {
     return choice
-      ? h.i18n('lobby.game.rps.output', [name, this.formatChoice(choice)])
-      : h.i18n('lobby.game.rps.timeout', [name])
+      ? t('output', [name, this.formatChoice(choice)])
+      : t('timeout', [name])
   }
 
   async start() {
@@ -25,17 +27,17 @@ class RPSGame extends Game<RPSGame.Options> {
     const players = Object.values(this.room.players)
     const scores = new Map(players.map(p => [p, 0]))
     while (true) {
-      await this.room.broadcast('game.rps.input', [++this.round])
+      await this.room.broadcast(t('input', [++this.round]))
       const choices = await Promise.all(players.map((player) => {
         return player.select(['R', 'P', 'S'], this.options.timeout)
       }))
       const outputs = players.map((p, i) => this.formatOutput(choices[i], p.name))
       if (choices[0] === choices[1]) {
-        const scoreText = h.i18n('lobby.game.rps.score', [
+        const scoreText = t('score', [
           players[0].name, scores.get(players[0]) + '',
           players[1].name, scores.get(players[1]) + '',
         ])
-        await this.room.broadcast('game.rps.result-0', [...outputs, scoreText])
+        await this.room.broadcast(t('result-0', [...outputs, scoreText]))
       } else {
         let winner: Player
         if (!choices[0]) {
@@ -50,13 +52,13 @@ class RPSGame extends Game<RPSGame.Options> {
         }
         const score = scores.get(winner) + 1
         scores.set(winner, score)
-        const scoreText = h.i18n('lobby.game.rps.score', [
+        const scoreText = t('score', [
           players[0].name, scores.get(players[0]) + '',
           players[1].name, scores.get(players[1]) + '',
         ])
-        await this.room.broadcast('game.rps.result-1', [...outputs, winner.name, scoreText])
+        await this.room.broadcast(t('result-1', [...outputs, winner.name, scoreText]))
         if (score >= this.options.rounds) {
-          await this.room.broadcast('game.rps.finish', [winner.name])
+          await this.room.broadcast(t('finish', [winner.name]))
           break
         }
       }

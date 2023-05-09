@@ -6,10 +6,7 @@ import Lobby from '.'
 
 const logger = new Logger('lobby')
 
-export interface Message {
-  type: string
-  param: any[]
-}
+const t = (path: string, param?: any) => h.i18n('lobby.system.' + path, param)
 
 export class Room extends Group {
   private inc = 0
@@ -18,7 +15,7 @@ export class Room extends Group {
   name: string
   lobby: Lobby
   players: Dict<Player> = Object.create(null)
-  messages: Message[] = []
+  messages: h[] = []
   game: Game
   speech: Room.SpeechMode = Room.SpeechMode.command
 
@@ -72,7 +69,7 @@ export class Room extends Group {
 
   join(player: Player) {
     this._join(player)
-    this.broadcast('system.join', [player.name])
+    this.broadcast(t('join', [player.name]))
     logger.debug(`${player} joined ${this}`)
   }
 
@@ -86,9 +83,9 @@ export class Room extends Group {
     const players = this.getByInc(ids)
     for (const player of players) {
       this._leave(player)
-      player.send(h.i18n('lobby.system.kick-self', [this.host.name]))
+      player.send(t('kick-self', [this.host.name]))
     }
-    this.broadcast('system.kick', [players.map(p => p.name).join(', '), this.host.name])
+    this.broadcast(t('kick', [players.map(p => p.name).join(', '), this.host.name]))
   }
 
   leave(player: Player) {
@@ -96,7 +93,7 @@ export class Room extends Group {
     if (!this.size) {
       this.destroy()
     } else {
-      this.broadcast('system.leave', [player.name])
+      this.broadcast(t('leave', [player.name]))
     }
   }
 
@@ -105,14 +102,14 @@ export class Room extends Group {
     this.host = this.getByInc([id])[0]
     if (leave) {
       this._leave(oldHost)
-      this.broadcast('system.leave-transfer', [this.host.name, oldHost.name])
+      this.broadcast(t('leave-transfer', [this.host.name, oldHost.name]))
     } else {
-      this.broadcast('system.transfer', [this.host.name, oldHost.name])
+      this.broadcast(t('transfer', [this.host.name, oldHost.name]))
     }
   }
 
   destroy() {
-    this.broadcast('system.destroy')
+    this.broadcast(t('destroy'))
     delete this.lobby.rooms[this.id]
     for (const player of Object.values(this.players)) {
       delete this.lobby.players[player.inc]
@@ -124,7 +121,7 @@ export class Room extends Group {
     if (!this.game) throw new SessionError('lobby.exception.game-not-found')
     await this.game.check()
     const results = await Promise.all(this.values().map((player) => {
-      return player.pause(h.i18n('lobby.system.ready'), 60000, true)
+      return player.pause(60000, t('ready'), true)
     }))
     if (!results.every(Boolean)) {
       throw new SessionError('lobby.system.cancel')
@@ -136,7 +133,7 @@ export class Room extends Group {
     } catch (error) {
       logger.debug(`game in ${this} was terminated`)
       logger.debug(error.stack)
-      await this.broadcast('system.terminated')
+      await this.broadcast(t('terminated'))
     }
   }
 

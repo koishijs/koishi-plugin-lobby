@@ -61,16 +61,19 @@ export class Player {
     })
   }
 
-  async pause(content: Fragment, timeout: number, noAppend = false) {
+  async pause(timeout: number, content?: Fragment, override = false) {
     content = h.normalize(content)
-    if (!noAppend) content.push(h('p', h.i18n('lobby.system.pause')))
+    if (!override) content.push(h('p', h.i18n('lobby.system.pause')))
     await this.send(content)
     return this.prompt<boolean>(async (session, next, done) => {
       return session.content ? done(true) : next()
     }, timeout)
   }
 
-  confirm(timeout: number) {
+  async confirm(timeout: number, content?: Fragment, override = false) {
+    content = h.normalize(content)
+    if (!override) content.push(h('p', h.i18n('lobby.system.confirm')))
+    await this.send(content)
     return this.prompt<boolean>(async (session, next, done) => {
       const content = session.content.trim().toUpperCase()
       if (!['Y', 'N'].includes(content)) return next()

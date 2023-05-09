@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-rps",
   "description": "RPS Game for Koishi",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -43,13 +43,13 @@
     "scissors"
   ],
   "peerDependencies": {
-    "koishi": "^4.12.7",
-    "koishi-plugin-lobby": "^0.2.3"
+    "koishi": "^4.12.8",
+    "koishi-plugin-lobby": "^0.3.0"
   },
   "devDependencies": {
     "@types/node": "^18.16.0",
     "atsc": "^1.2.2",
-    "koishi": "^4.12.7",
+    "koishi": "^4.12.8",
     "typescript": "^5.0.4"
   }
 }

@@ -1,9 +1,8 @@
-import { Dict, h, Logger, Random, Session, SessionError } from 'koishi'
+import { Dict, h, Logger, Random, SessionError } from 'koishi'
 import { Player } from './player'
 import { Game } from './game'
-import { Future } from './future'
-import Lobby from '.'
 import { Group } from './group'
+import Lobby from '.'
 
 const logger = new Logger('lobby')
 
@@ -31,30 +30,6 @@ export class Room extends Group {
     this.lobby.rooms[this.id] = this
     logger.debug(`${this} created`)
     this._join(host)
-  }
-
-  group(predicate: (player: Player) => boolean) {
-    return new Group(this, predicate)
-  }
-
-  task() {
-    return new Future()
-  }
-
-  async prompt<T>(players: Player[], accept: (session: Session, player: Player) => T, timeout: number) {
-    const result = new Map<Player, T>()
-    const task = new Future()
-    task.timeout(timeout)
-    for (const player of players) {
-      task.defer(player.middleware((session, next) => {
-        const content = accept(session, player)
-        if (!content) return next()
-        result.set(player, content)
-        if (result.size === players.length) task.done()
-      }))
-    }
-    await task.execute()
-    return result
   }
 
   get size() {
@@ -148,14 +123,12 @@ export class Room extends Group {
   async start() {
     if (!this.game) throw new SessionError('lobby.exception.game-not-found')
     await this.game.check()
-    await this.broadcast('system.confirm')
-    const result = await this.prompt(Object.values(this.players), (session) => {
-      return session.content.trim()
-    }, 60000)
-    if (result.size !== this.size) {
-      return this.broadcast('system.cancel')
+    const results = await Promise.all(this.values().map((player) => {
+      return player.pause(h.i18n('lobby.system.ready'), 60000, true)
+    }))
+    if (!results.every(Boolean)) {
+      throw new SessionError('lobby.system.cancel')
     }
-    await this.broadcast('system.start')
     logger.debug(`game in ${this} was started`)
     try {
       await this.game.start()

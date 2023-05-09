@@ -1,5 +1,5 @@
 import { Context, h, Schema } from 'koishi'
-import { Corridor, Future, Game, Player } from 'koishi-plugin-lobby'
+import { Corridor, Game, Player } from 'koishi-plugin-lobby'
 
 class RPSGame extends Game<RPSGame.Options> {
   private round: number
@@ -26,22 +26,10 @@ class RPSGame extends Game<RPSGame.Options> {
     const scores = new Map(players.map(p => [p, 0]))
     while (true) {
       await this.room.broadcast('game.rps.input', [++this.round])
-      const results = new Map<Player, string>()
-      const future = new Future()
-      future.timeout(this.options.timeout)
-      for (const player of players) {
-        const dispose = player.middleware((session, next) => {
-          const content = session.content.trim().toLowerCase()
-          if (content.length !== 1 || !'rps'.includes(content)) return next()
-          player.send(h.i18n('lobby.game.rps.accepted', [this.formatChoice(content)]))
-          results.set(player, content)
-          dispose()
-        })
-        future.defer(dispose)
-      }
-      await future.execute()
-      const choices = players.map(p => results.get(p))
-      const outputs = players.map(p => this.formatOutput(results.get(p), p.name))
+      const choices = await Promise.all(players.map((player) => {
+        return player.select(['R', 'P', 'S'], this.options.timeout)
+      }))
+      const outputs = players.map((p, i) => this.formatOutput(choices[i], p.name))
       if (choices[0] === choices[1]) {
         const scoreText = h.i18n('lobby.game.rps.score', [
           players[0].name, scores.get(players[0]) + '',

@@ -1,4 +1,4 @@
-import { Bot, Fragment, Middleware, Session, sleep } from 'koishi'
+import { Awaitable, Bot, Fragment, h, Next, Session, sleep } from 'koishi'
 import { Room } from './room'
 import Lobby from '.'
 
@@ -45,12 +45,45 @@ export class Player {
     })
   }
 
-  middleware(middleware: Middleware) {
-    return this.lobby.ctx.middleware((session, next) => {
-      if (session.subtype !== 'private') return next()
-      if (session.userId !== this.userId || session.platform !== this.platform) return next()
-      return middleware(session, next)
-    }, true)
+  prompt<T = void>(callback: (session: Session, next: Next, done: (value: T) => void) => Awaitable<void | Fragment>, timeout: number) {
+    return new Promise<T>((resolve) => {
+      const dispose1 = this.lobby.ctx.middleware(async (session, next) => {
+        if (session.subtype !== 'private') return next()
+        if (session.userId !== this.userId || session.platform !== this.platform) return next()
+        return callback(session, next, done)
+      }, true)
+      const dispose2 = this.lobby.ctx.setTimeout(() => done(undefined), timeout)
+      const done = (value: T) => {
+        resolve(value)
+        dispose1()
+        dispose2()
+      }
+    })
+  }
+
+  async pause(content: Fragment, timeout: number, noAppend = false) {
+    content = h.normalize(content)
+    if (!noAppend) content.push(h('p', h.i18n('lobby.system.pause')))
+    await this.send(content)
+    return this.prompt<boolean>(async (session, next, done) => {
+      return session.content ? done(true) : next()
+    }, timeout)
+  }
+
+  confirm(timeout: number) {
+    return this.prompt<boolean>(async (session, next, done) => {
+      const content = session.content.trim().toUpperCase()
+      if (!['Y', 'N'].includes(content)) return next()
+      done(content === 'Y')
+    }, timeout)
+  }
+
+  select(choices: string[], timeout: number) {
+    return this.prompt<string>(async (session, next, done) => {
+      const content = session.content.trim().toUpperCase()
+      if (!choices.includes(content)) return next()
+      done(content)
+    }, timeout)
   }
 
   toString() {

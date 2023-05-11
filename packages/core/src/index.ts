@@ -36,11 +36,12 @@ class Lobby extends Service {
     ctx.private().middleware((session, next) => {
       const player = this.players[session.user['id']]
       if (!player) return next()
-      const content = this._stripPrefix(session)
+      let content = this._stripPrefix(session)
       if (!content) return next()
+      if (session.quote) content += ' ' + session.quote.content
       return session.execute({
         name: 'talk',
-        args: [content],
+        args: [content.trim()],
         session,
       })
     })
@@ -173,7 +174,7 @@ class Lobby extends Service {
         player.room.start()
       })
 
-    ctx.command('lobby.visit <id:string>')
+    ctx.guild().command('lobby.visit <id:string>')
       .channelFields(['locale'])
       .action(({ session }, id) => {
         const room = this.assert.room(id)
@@ -185,10 +186,16 @@ class Lobby extends Service {
       .action(({ session }, content) => {
         if (!content) return session.text('.expect-content')
         const player = this.assert.busy(session.user.id)
-        if (!player.room.allowSpeech) {
+        if (!player.room.allowSpeech && !player.allowSpeech) {
           return session.text('.disabled')
         }
-        return player.room.broadcast(h.i18n('lobby.talk.player', [content, player.name]))
+        const group = player.privateSpeech
+          ? player.room.filter((player) => player.allowSpeech, true)
+          : player.room
+        return group.broadcast([
+          h.i18n('lobby.speech.player', [player.name]),
+          ...h.parse(content),
+        ], false)
       })
   }
 
@@ -202,7 +209,7 @@ class Lobby extends Service {
     const content = session.parsed.content
     for (const prefix of this._resolvePrefix(session)) {
       if (!content.startsWith(prefix)) continue
-      return content.slice(prefix.length).trim()
+      return content.slice(prefix.length)
     }
   }
 }

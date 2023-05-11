@@ -9,6 +9,7 @@ export class Player extends Guest {
   room: Room
   player = this
   allowSpeech: boolean
+  privateSpeech: boolean
 
   constructor(session: Session<'id' | 'name' | 'locale'>) {
     super(session)

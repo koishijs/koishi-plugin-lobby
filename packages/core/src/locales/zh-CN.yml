@@ -93,5 +93,5 @@ lobby:
     confirm: 输入「Y」以确认，输入「N」以取消。
     cancel: 系统消息：由于有玩家未确认，游戏已自动取消。
     terminated: 系统消息：游戏因为异常而中止。
-  talk:
-    player: '{1}：{0}'
+  speech:
+    player: '{0}：'

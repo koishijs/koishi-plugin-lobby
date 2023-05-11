@@ -29,7 +29,7 @@ export abstract class Guest {
     return this.sendTask
   }
 
-  send(content: Fragment) {
+  send(content: Fragment, queued = true) {
     const session = this.bot.session({
       subtype: 'group',
       type: 'message',
@@ -40,6 +40,7 @@ export abstract class Guest {
       locale: this.locale,
       elements: h.normalize(content),
     })
+    if (!queued) return this._send(session)
     return this.sendTask = this.sendTask.then(async () => {
       await this._send(session)
       await sleep(this.lobby.config.delay.message)

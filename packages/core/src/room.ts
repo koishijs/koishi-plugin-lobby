@@ -123,10 +123,10 @@ export class Room extends Group {
     if (!this.game) throw new SessionError('lobby.exception.game-not-found')
     await this.game.check()
     const results = await Promise.all(this.values().map((player) => {
-      return player.pause(60000, t('ready'), true)
+      return player.pause(600000, t('ready'), true)
     }))
     if (!results.every(Boolean)) {
-      throw new SessionError('lobby.system.cancel')
+      return this.broadcast(t('cancel'))
     }
     logger.debug(`game in ${this} was started`)
     const oldAllowSpeech = this.allowSpeech

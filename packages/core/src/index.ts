@@ -4,10 +4,12 @@ import { Assert } from './assert'
 import { Room } from './room'
 import { Player } from './player'
 import { Corridor } from './corridor'
+import { GuestChannel } from './guest'
 
 export * from './corridor'
 export * from './game'
 export * from './group'
+export * from './guest'
 export * from './player'
 export * from './room'
 
@@ -169,6 +171,13 @@ class Lobby extends Service {
       .action(({ session }) => {
         const player = this.assert.host(session.user.id)
         player.room.start()
+      })
+
+    ctx.command('lobby.visit <id:string>')
+      .channelFields(['locale'])
+      .action(({ session }, id) => {
+        const room = this.assert.room(id)
+        room.guests.add(new GuestChannel(session))
       })
 
     ctx.private().command('lobby/talk <content:text>', { hidden: true })

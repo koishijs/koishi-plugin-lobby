@@ -27,9 +27,10 @@ class RPSGame extends Game<RPSGame.Options> {
     const players = Object.values(this.room.players)
     const scores = new Map(players.map(p => [p, 0]))
     while (true) {
-      await this.room.broadcast(t('input', [++this.round]))
-      const choices = await Promise.all(players.map((player) => {
-        return player.select(['R', 'P', 'S'], this.options.timeout)
+      ++this.round
+      const choices = await Promise.all(players.map(async (player) => {
+        await player.send(t('input', [++this.round]))
+        return player.select(['r', 'p', 's'], this.options.timeout)
       }))
       const outputs = players.map((p, i) => this.formatOutput(choices[i], p.name))
       if (choices[0] === choices[1]) {

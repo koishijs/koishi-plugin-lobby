@@ -15,7 +15,10 @@ export class Group {
 
   async broadcast(content: Fragment) {
     const message = h('', h.normalize(content))
-    if (!this.silent) this.room.messages.push(message)
+    if (!this.silent) {
+      this.room.messages.push(message)
+      this.room.guests.forEach((guest) => guest.send(message))
+    }
     await Promise.all(this.values().map(({ player }) => {
       return player.send(message)
     }))

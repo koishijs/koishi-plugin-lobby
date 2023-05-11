@@ -2,6 +2,7 @@ import { Dict, h, Logger, Random, SessionError } from 'koishi'
 import { Player } from './player'
 import { Game } from './game'
 import { Group } from './group'
+import { Guest } from './guest'
 import Lobby from '.'
 
 const logger = new Logger('lobby')
@@ -14,6 +15,7 @@ export class Room extends Group {
   id: string
   name: string
   lobby: Lobby
+  guests = new Set<Guest>()
   players: Dict<Player> = Object.create(null)
   messages: h[] = []
   game: Game

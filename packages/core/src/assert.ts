@@ -1,4 +1,4 @@
-import { SessionError } from 'koishi'
+import { Session, SessionError } from 'koishi'
 import Lobby from '.'
 
 export class Assert {
@@ -10,19 +10,24 @@ export class Assert {
     return room
   }
 
-  idle(id: number) {
-    const player = this.lobby.players[id]
-    if (player) throw new SessionError('lobby.exception.already-in-room', player.room)
+  idle(session: Session) {
+    const player = this.lobby.guests[session.cid]
+    if (!player) return
+    if (player.subtype === 'private') {
+      throw new SessionError('lobby.exception.busy-1', player.room)
+    } else {
+      throw new SessionError('lobby.exception.busy-2', player.room)
+    }
   }
 
-  busy(id: number) {
-    const player = this.lobby.players[id]
+  busy(session: Session) {
+    const player = this.lobby.guests[session.cid]
     if (!player) throw new SessionError('lobby.exception.not-in-room')
     return player
   }
 
-  host(id: number) {
-    const player = this.busy(id)
+  host(session: Session) {
+    const player = this.busy(session)
     if (player.room.host !== player) throw new SessionError('lobby.exception.expect-host')
     return player
   }

@@ -20,6 +20,7 @@ export class Room extends Group {
   messages: h[] = []
   game: Game
   allowSpeech = true
+  locked = false
 
   constructor(public host: Player, public options: Room.Options) {
     super(null, () => true)
@@ -77,7 +78,7 @@ export class Room extends Group {
 
   _leave(player: Player) {
     delete this.players[player.inc]
-    delete this.lobby.players[player.id]
+    delete this.lobby.guests[player.cid]
     logger.debug(`${player} left ${this}`)
   }
 
@@ -114,7 +115,7 @@ export class Room extends Group {
     this.broadcast(t('destroy'))
     delete this.lobby.rooms[this.id]
     for (const player of Object.values(this.players)) {
-      delete this.lobby.players[player.inc]
+      delete this.lobby.guests[player.inc]
     }
     logger.debug(`${this} destroyed`)
   }
@@ -130,7 +131,9 @@ export class Room extends Group {
     }
     logger.debug(`game in ${this} was started`)
     const oldAllowSpeech = this.allowSpeech
+    const oldLocked = this.locked
     try {
+      this.locked = true
       await this.game.start()
       logger.debug(`game in ${this} was finished`)
     } catch (error) {
@@ -139,6 +142,7 @@ export class Room extends Group {
       await this.broadcast(t('terminated'))
     } finally {
       this.allowSpeech = oldAllowSpeech
+      this.locked = oldLocked
     }
   }
 

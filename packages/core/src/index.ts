@@ -4,7 +4,7 @@ import { Assert } from './assert'
 import { Room } from './room'
 import { Player } from './player'
 import { Corridor } from './corridor'
-import { GuestChannel } from './guest'
+import { Guest, GuestChannel } from './guest'
 
 export * from './corridor'
 export * from './game'
@@ -22,7 +22,7 @@ declare module 'koishi' {
 class Lobby extends Service {
   public assert = new Assert(this)
   public rooms: Dict<Room> = Object.create(null)
-  public players: Dict<Player> = Object.create(null)
+  public guests: Dict<Guest> = Object.create(null)
   public corridors: Dict<Corridor> = Object.create(null)
 
   constructor(public ctx: Context, public config: Lobby.Config) {
@@ -34,11 +34,11 @@ class Lobby extends Service {
     })
 
     ctx.private().middleware((session, next) => {
-      const player = this.players[session.user['id']]
+      const player = this.guests[session.cid]
       if (!player) return next()
       let content = this._stripPrefix(session)
-      if (!content) return next()
       if (session.quote) content += ' ' + session.quote.content
+      if (!content) return next()
       return session.execute({
         name: 'talk',
         args: [content.trim()],
@@ -67,7 +67,7 @@ class Lobby extends Service {
     ctx.private().command('lobby.room')
       .userFields(['id', 'name', 'locale'])
       .action(({ session }) => {
-        const player = this.assert.busy(session.user.id)
+        const player = this.assert.busy(session)
         const output = [session.text('.overview', {
           id: player.room.id,
           host: player.room.host.name,
@@ -90,7 +90,7 @@ class Lobby extends Service {
       .option('private', '-p')
       .option('private', '-P, --public', { value: false })
       .action(({ session, options }) => {
-        this.assert.idle(session.user.id)
+        this.assert.idle(session)
         const room = new Room(new Player(session), options)
         return session.text('.success', room)
       })
@@ -101,26 +101,39 @@ class Lobby extends Service {
       .option('private', '-p')
       .option('private', '-P, --public', { value: false })
       .action(({ session, options }) => {
-        const player = this.assert.host(session.user.id)
+        const player = this.assert.host(session)
         Object.assign(player.room.options, options)
         return session.text('.success')
       })
 
-    ctx.private().command('lobby.join <id:string>')
-      .userFields(['id', 'name', 'locale'])
+    ctx.command('lobby.join <id:string>')
+      .userFields(['name', 'locale'])
+      .channelFields(['locale'])
       .action(({ session }, id) => {
-        this.assert.idle(session.user.id)
+        this.assert.idle(session)
         const room = this.assert.room(id)
-        if (room.size >= (room.options.capacity || Infinity)) {
-          return session.text('.full')
+        if (session.subtype === 'private') {
+          if (room.locked) return session.text('.locked')
+          if (room.size >= (room.options.capacity || Infinity)) {
+            return session.text('.full')
+          }
+          room.join(new Player(session))
+        } else {
+          const guest = new GuestChannel(session)
+          guest.room = room
+          room.guests.add(guest)
+          return session.text('.sync', [room.id])
         }
-        room.join(new Player(session))
       })
 
-    ctx.private().command('lobby.leave')
+    ctx.command('lobby.leave')
       .userFields(['id', 'name'])
       .action(async ({ session }) => {
-        const player = this.assert.busy(session.user.id)
+        const player = this.assert.busy(session) as Player
+        if (session.subtype !== 'private') {
+          player.room.guests.delete(player)
+          return
+        }
         if (player.room.host !== player) {
           player.room.leave(player)
         } else if (player.room.size === 1) {
@@ -147,7 +160,7 @@ class Lobby extends Service {
     ctx.private().command('lobby.kick <...id:number>')
       .userFields(['id', 'name'])
       .action(({ session }, ...incs) => {
-        const player = this.assert.host(session.user.id)
+        const player = this.assert.host(session)
         if (!incs.length) return session.text('.expect-id')
         player.room.kick(incs)
       })
@@ -155,7 +168,7 @@ class Lobby extends Service {
     ctx.private().command('lobby.transfer <id:number>')
       .userFields(['id', 'name'])
       .action(({ session }, inc) => {
-        const player = this.assert.host(session.user.id)
+        const player = this.assert.host(session)
         if (!inc) return session.text('.expect-id')
         player.room.transfer(inc)
       })
@@ -163,29 +176,22 @@ class Lobby extends Service {
     ctx.private().command('lobby.destroy')
       .userFields(['id', 'name'])
       .action(({ session }) => {
-        const player = this.assert.host(session.user.id)
+        const player = this.assert.host(session)
         player.room.destroy()
       })
 
     ctx.private().command('lobby.start')
       .userFields(['id', 'name'])
       .action(({ session }) => {
-        const player = this.assert.host(session.user.id)
+        const player = this.assert.host(session)
         player.room.start()
-      })
-
-    ctx.guild().command('lobby.visit <id:string>')
-      .channelFields(['locale'])
-      .action(({ session }, id) => {
-        const room = this.assert.room(id)
-        room.guests.add(new GuestChannel(session))
       })
 
     ctx.private().command('lobby/talk <content:text>', { hidden: true })
       .userFields(['id', 'name'])
       .action(({ session }, content) => {
         if (!content) return session.text('.expect-content')
-        const player = this.assert.busy(session.user.id)
+        const player = this.assert.busy(session) as Player
         if (!player.room.allowSpeech && !player.allowSpeech) {
           return session.text('.disabled')
         }

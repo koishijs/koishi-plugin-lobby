@@ -42,6 +42,8 @@ commands:
     messages:
       success: 加入房间成功！
       full: 该房间人数已满，无法加入。
+      locked: 该房间已被锁定，无法加入。
+      sync: 将同步推送房间 {0} 的消息。
   lobby.leave:
     description: 离开房间
     messages:
@@ -71,7 +73,8 @@ commands:
 
 lobby:
   exception:
-    already-in-room: 你已在房间 {id} 中。输入「room leave」以离开当前房间。
+    busy-1: 你已在房间 {id} 中。输入「room leave」以离开当前房间。
+    busy-2: 你当前正在同步推送房间 {id} 的消息。输入「room leave」以离开当前房间。
     not-in-room: 你并不在任何房间中。
     room-not-found: 房间 {0} 不存在。
     player-not-found: 房间中没有编号为 {0} 的玩家。

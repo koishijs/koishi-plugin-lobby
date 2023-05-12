@@ -1,7 +1,9 @@
 import { Bot, Fragment, h, Session, sleep } from 'koishi'
+import { Room } from './room'
 import Lobby from '.'
 
 export abstract class Guest {
+  cid: string
   bot: Bot
   subtype: string
   platform: string
@@ -10,20 +12,25 @@ export abstract class Guest {
   guildId: string
   locale: string
   lobby: Lobby
+  room: Room
 
   private sendTask = Promise.resolve()
 
   constructor(session: Session) {
     this.bot = session.bot
+    this.cid = session.cid
     this.subtype = session.subtype
     this.platform = session.platform
     this.userId = session.userId
     this.channelId = session.channelId
     this.guildId = session.guildId
     this.lobby = session.app.lobby
+    this.lobby.guests[this.cid] = this
   }
 
-  abstract _send(session: Session): Promise<any>
+  private _send(session: Session) {
+    return this.bot.sendMessage(session.channelId, session.elements, session.guildId, { session })
+  }
 
   flush() {
     return this.sendTask
@@ -52,9 +59,5 @@ export class GuestChannel extends Guest {
   constructor(session: Session<never, 'locale'>) {
     super(session)
     this.locale = session.channel?.locale
-  }
-
-  _send(session: Session) {
-    return this.bot.sendMessage(session.channelId, session.elements, session.guildId, { session })
   }
 }

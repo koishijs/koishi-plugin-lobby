@@ -10,12 +10,11 @@ export abstract class Corridor {
 
   constructor(private ctx: Context, public name: string) {
     this.cmd = ctx.command(`game/${name}`)
-      .userFields(['id'])
       .action(async ({ session, options }) => {
-        if (!ctx.lobby.players[session.user.id]) {
+        if (!ctx.lobby.guests[session.cid]) {
           await session.execute('lobby.create')
         }
-        const player = ctx.lobby.assert.host(session.user.id)
+        const player = ctx.lobby.assert.host(session)
         Reflect.construct(this.factory, [player.room, this, options])
       })
 

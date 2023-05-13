@@ -17,6 +17,10 @@ declare module 'koishi' {
   interface Context {
     lobby: Lobby
   }
+
+  interface Events {
+    'lobby/leave'(player: Player): void
+  }
 }
 
 class Lobby extends Service {

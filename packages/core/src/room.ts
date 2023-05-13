@@ -98,6 +98,7 @@ export class Room extends Group {
     } else {
       this.broadcast(t('leave', [player.name]))
     }
+    this.lobby.ctx.emit('lobby/leave', player)
   }
 
   transfer(id: number, leave = false) {
@@ -106,6 +107,7 @@ export class Room extends Group {
     if (leave) {
       this._leave(oldHost)
       this.broadcast(t('leave-transfer', [this.host.name, oldHost.name]))
+      this.lobby.ctx.emit('lobby/leave', oldHost)
     } else {
       this.broadcast(t('transfer', [this.host.name, oldHost.name]))
     }
@@ -122,7 +124,7 @@ export class Room extends Group {
 
   async start() {
     if (!this.game) throw new SessionError('lobby.exception.game-not-found')
-    await this.game.check()
+    await this.game.validate()
     const results = await Promise.all(this.values().map((player) => {
       return player.pause(600000, t('ready'), true)
     }))

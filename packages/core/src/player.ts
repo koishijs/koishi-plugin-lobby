@@ -17,7 +17,7 @@ export class Player extends Guest {
   }
 
   prompt<T = void>(callback: (session: Session, next: Next, done: (value: T) => void) => Awaitable<void | Fragment>, timeout: number, post = false) {
-    return new Promise<T>((resolve) => {
+    return new Promise<T>((resolve, reject) => {
       const dispose1 = this.lobby.ctx.middleware(async (session, next) => {
         if (session.subtype !== 'private') return next()
         if (session.userId !== this.userId || session.platform !== this.platform) return next()
@@ -25,10 +25,23 @@ export class Player extends Guest {
         return next((next) => callback(session, next, done))
       }, true)
       const dispose2 = this.lobby.ctx.setTimeout(() => done(undefined), timeout)
-      const done = (value: T) => {
-        resolve(value)
+      const dispose3 = this.lobby.ctx.on('lobby/leave', (player) => {
+        if (player.room !== this.room) return
+        try {
+          this.room.game?.leave(player)
+        } catch (error) {
+          reject(error)
+          dispose()
+        }
+      })
+      const dispose = () => {
         dispose1()
         dispose2()
+        dispose3()
+      }
+      const done = (value: T) => {
+        resolve(value)
+        dispose()
       }
     })
   }
@@ -37,12 +50,13 @@ export class Player extends Guest {
     content = h.normalize(content)
     content.push(h('p', h.i18n('lobby.system.pause')))
     await this.send(content)
-    const result = this.prompt<boolean>(async (session, next, done) => {
+    const result = await this.prompt<boolean>(async (session, next, done) => {
       return session.content ? done(true) : next()
     }, timeout, true)
     if (result && response) {
       await this.send(h.i18n('lobby.system.pause-response'))
     }
+    return result
   }
 
   async confirm(timeout: number, content?: Fragment, override = false) {
@@ -52,7 +66,7 @@ export class Player extends Guest {
     return this.prompt<boolean>(async (session, next, done) => {
       const content = session.content.trim().toLowerCase()
       if (!['y', 'n'].includes(content)) return next()
-      done(content === 'Y')
+      done(content === 'y')
     }, timeout)
   }
 

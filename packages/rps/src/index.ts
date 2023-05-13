@@ -1,15 +1,26 @@
-import { Context, h, Schema } from 'koishi'
+import { Context, h, Logger, Schema } from 'koishi'
 import { Corridor, Game, Player } from 'koishi-plugin-lobby'
 
 const t = (path: string, param?: any) => h.i18n('lobby.game.rps.' + path, param)
 
+const logger = new Logger('rps')
+
 class RPSGame extends Game<RPSGame.Options> {
   private round: number
+  private players: Player[]
+  private scores: Map<Player, number>
+  private winner: Player
 
-  async check() {
+  async validate() {
     if (this.room.size !== 2) {
       throw new Error('lobby.game.rps.invalid-player-count')
     }
+  }
+
+  leave(player: Player) {
+    const index = this.players.indexOf(player)
+    this.winner = this.players[1 - index]
+    throw new Error('game over')
   }
 
   private formatChoice(choice: string) {
@@ -22,48 +33,59 @@ class RPSGame extends Game<RPSGame.Options> {
       : t('timeout', [name])
   }
 
-  async start() {
-    this.round = 0
-    const players = Object.values(this.room.players)
-    const scores = new Map(players.map(p => [p, 0]))
-    while (true) {
-      ++this.round
-      const choices = await Promise.all(players.map(async (player) => {
-        await player.send(t('input', [++this.round]))
-        return player.select(['r', 'p', 's'], this.options.timeout)
-      }))
-      const outputs = players.map((p, i) => this.formatOutput(choices[i], p.name))
-      if (choices[0] === choices[1]) {
-        const scoreText = t('score', [
-          players[0].name, scores.get(players[0]) + '',
-          players[1].name, scores.get(players[1]) + '',
-        ])
-        await this.room.broadcast(t('result-0', [...outputs, scoreText]))
+  async action() {
+    ++this.round
+    logger.debug('round %d', this.round)
+    const choices = await Promise.all(this.players.map(async (player) => {
+      await player.send(t('input', [this.round]))
+      return player.select(['r', 'p', 's'], this.options.timeout)
+    }))
+    logger.debug('choices %o', choices)
+    const outputs = this.players.map((p, i) => this.formatOutput(choices[i], p.name))
+    if (choices[0] === choices[1]) {
+      const scoreText = t('score', [
+        this.players[0].name, this.scores.get(this.players[0]) + '',
+        this.players[1].name, this.scores.get(this.players[1]) + '',
+      ])
+      await this.room.broadcast(t('result-0', [...outputs, scoreText]))
+    } else {
+      let winner: Player
+      if (!choices[0]) {
+        winner = this.players[1]
+      } else if (!choices[1]) {
+        winner = this.players[0]
       } else {
-        let winner: Player
-        if (!choices[0]) {
-          winner = players[1]
-        } else if (!choices[1]) {
-          winner = players[0]
-        } else {
-          winner = choices[0] === 'r' && choices[1] === 's'
-            || choices[0] === 'p' && choices[1] === 'r'
-            || choices[0] === 's' && choices[1] === 'p'
-            ? players[0] : players[1]
-        }
-        const score = scores.get(winner) + 1
-        scores.set(winner, score)
-        const scoreText = t('score', [
-          players[0].name, scores.get(players[0]) + '',
-          players[1].name, scores.get(players[1]) + '',
-        ])
-        await this.room.broadcast(t('result-1', [...outputs, winner.name, scoreText]))
-        if (score >= this.options.rounds) {
-          await this.room.broadcast(t('finish', [winner.name]))
-          break
-        }
+        winner = choices[0] === 'r' && choices[1] === 's'
+          || choices[0] === 'p' && choices[1] === 'r'
+          || choices[0] === 's' && choices[1] === 'p'
+          ? this.players[0] : this.players[1]
+      }
+      const score = this.scores.get(winner) + 1
+      this.scores.set(winner, score)
+      const scoreText = t('score', [
+        this.players[0].name, this.scores.get(this.players[0]) + '',
+        this.players[1].name, this.scores.get(this.players[1]) + '',
+      ])
+      await this.room.broadcast(t('result-1', [...outputs, winner.name, scoreText]))
+      if (score >= this.options.rounds) {
+        throw new Error('game over')
       }
     }
+  }
+
+  async start() {
+    this.round = 0
+    this.winner = null
+    this.players = Object.values(this.room.players)
+    this.scores = new Map(this.players.map(p => [p, 0]))
+    try {
+      while (true) {
+        await this.action()
+      }
+    } catch (e) {
+      if (!this.winner) throw e
+    }
+    await this.room.broadcast(t('finish', [this.winner.name]))
   }
 }
 

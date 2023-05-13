@@ -28,8 +28,8 @@ export abstract class Guest {
     this.lobby.guests[this.cid] = this
   }
 
-  private _send(session: Session) {
-    return this.bot.sendMessage(session.channelId, session.elements, session.guildId, { session })
+  private async _send(session: Session) {
+    await this.bot.sendMessage(session.channelId, session.elements, session.guildId, { session })
   }
 
   flush() {

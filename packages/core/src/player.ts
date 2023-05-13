@@ -33,13 +33,16 @@ export class Player extends Guest {
     })
   }
 
-  async pause(timeout: number, content?: Fragment, override = false) {
+  async pause(timeout: number, content?: Fragment, response?: boolean) {
     content = h.normalize(content)
-    if (!override) content.push(h('p', h.i18n('lobby.system.pause')))
+    content.push(h('p', h.i18n('lobby.system.pause')))
     await this.send(content)
-    return this.prompt<boolean>(async (session, next, done) => {
+    const result = this.prompt<boolean>(async (session, next, done) => {
       return session.content ? done(true) : next()
     }, timeout, true)
+    if (result && response) {
+      await this.send(h.i18n('lobby.system.pause-response'))
+    }
   }
 
   async confirm(timeout: number, content?: Fragment, override = false) {

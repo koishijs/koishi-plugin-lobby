@@ -1,0 +1,67 @@
+{
+  "description": "",
+  "head": [
+    [
+      "link",
+      {
+        "rel": "icon",
+        "href": ""
+      }
+    ],
+    [
+      "link",
+      {
+        "rel": "manifest",
+        "href": ""
+      }
+    ],
+    [
+      "meta",
+      {
+        "name": "theme-color",
+        "content": "#5546a3"
+      }
+    ]
+  ],
+  "themeConfig": {
+    "editLink": {
+      "text": "Translate this page on Crowdin",
+      "pattern": ""
+    },
+    "sidebar": {
+      "/": [
+        {
+          "text": "Developing Guide",
+          "items": [
+            {
+              "text": "Introduction",
+              "link": ""
+            }
+          ]
+        },
+        {
+          "text": "plugin",
+          "items": [
+            {
+              "text": "",
+              "link": ""
+            }
+          ]
+        },
+        {
+          "text": "About",
+          "items": [
+            {
+              "text": "",
+              "link": ""
+            },
+            {
+              "text": "",
+              "link": ""
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

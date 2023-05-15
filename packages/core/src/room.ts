@@ -19,6 +19,7 @@ export class Room extends Group {
   players: Dict<Player> = Object.create(null)
   messages: h[] = []
   game: Game
+  playing = false
   allowSpeech = true
   locked = false
 
@@ -37,7 +38,7 @@ export class Room extends Group {
   }
 
   get status(): Room.Status {
-    return this.game ? 'playing' : 'waiting'
+    return this.playing ? 'playing' : this.game ? 'waiting' : 'idle'
   }
 
   listPlayers(ignoreHost = false) {
@@ -136,6 +137,7 @@ export class Room extends Group {
     const oldLocked = this.locked
     try {
       this.locked = true
+      this.playing = true
       await this.game.start()
       logger.debug(`game in ${this} was finished`)
     } catch (error) {
@@ -145,6 +147,7 @@ export class Room extends Group {
     } finally {
       this.allowSpeech = oldAllowSpeech
       this.locked = oldLocked
+      this.playing = false
     }
   }
 
@@ -154,7 +157,7 @@ export class Room extends Group {
 }
 
 export namespace Room {
-  export type Status = 'playing' | 'waiting'
+  export type Status = 'playing' | 'waiting' | 'idle'
 
   export interface Options {
     capacity?: number

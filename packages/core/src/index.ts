@@ -53,6 +53,8 @@ class Lobby extends Service {
     ctx.private().command('game')
 
     ctx.command('lobby')
+
+    ctx.command('lobby.list')
       .action(({ session }) => {
         const output = Object
           .values(this.rooms)

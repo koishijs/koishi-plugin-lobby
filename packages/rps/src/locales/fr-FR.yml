@@ -30,3 +30,5 @@ lobby.game.rps:
   result-1: |-
     {0}, {1}. {2} marque le point gagnant.
     <p>{3}</p>
+  score: "Le score actuellement :\n{0} : {1} points\n{2} : {3} points"
+  finish: Fin de partie, {0} a gagné !

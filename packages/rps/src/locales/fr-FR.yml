@@ -1,0 +1,8 @@
+commands:
+  rps:
+    description: Pierre-papier-ciseaux
+    options:
+      rounds: Les points nécessaires pour remporter le jeu
+      timeout: Délai pour choisir
+lobby.game.rps:
+  invalid-player-count: 2 personnes seulement pour jouer au jeu.

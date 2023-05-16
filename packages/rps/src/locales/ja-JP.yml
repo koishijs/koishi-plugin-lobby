@@ -1,6 +1,6 @@
 commands:
   rps:
-    description: じゃんけんぽん
+    description: じゃん・けん・ぽん！
     options:
       rounds: 勝者を決める回数
       timeout: 制限時間

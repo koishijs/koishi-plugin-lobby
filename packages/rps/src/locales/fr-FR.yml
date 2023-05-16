@@ -1,8 +1,32 @@
 commands:
   rps:
-    description: Pierre-papier-ciseaux
+    description: Pierre-feuille-ciseaux
     options:
       rounds: Les points nécessaires pour remporter le jeu
       timeout: Délai pour choisir
 lobby.game.rps:
   invalid-player-count: 2 personnes seulement pour jouer au jeu.
+  input: |-
+    <plural count={0}>
+    <></>
+    <>1er</>
+    <>{0}e</>
+    </plural> Tour
+    Entrez le mot pour révéler votre forme de main : 
+    [R] La pierre
+    [P] La feuille
+    [S] Les ciseaux
+
+  choice:
+    r: la pierre
+    p: la feuille
+    s: les ciseaux
+  accepted: 'Vous révélez {0}, veuillez attendre la forme de main de l''adversaire.'
+  output: '{0} a révélé {1}'
+  timeout: '{0} n''a pas révélé la main dans le délai imparti.'
+  result-0: |-
+    {0}, {1}. C'est un match nul.
+    <p>{2}</p>
+  result-1: |-
+    {0}, {1}. {2} marque le point gagnant.
+    <p>{3}</p>

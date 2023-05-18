@@ -160,6 +160,7 @@ export namespace Room {
   export type Status = 'playing' | 'waiting' | 'idle'
 
   export interface Options {
+    name?: string
     capacity?: number
     private?: boolean
   }

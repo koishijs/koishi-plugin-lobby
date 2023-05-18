@@ -93,6 +93,7 @@ class Lobby extends Service {
     ctx.private().command('lobby.create')
       .userFields(['id', 'name', 'locale'])
       .option('capacity', '-c [count:number]', { fallback: 10 })
+      .option('name', '-n [name:string]')
       .option('private', '-p')
       .option('private', '-P, --public', { value: false })
       .action(({ session, options }) => {
@@ -104,6 +105,7 @@ class Lobby extends Service {
     ctx.private().command('lobby.config')
       .userFields(['id', 'name', 'locale'])
       .option('capacity', '-c [count:number]')
+      .option('name', '-n [name:string]')
       .option('private', '-p')
       .option('private', '-P, --public', { value: false })
       .action(({ session, options }) => {

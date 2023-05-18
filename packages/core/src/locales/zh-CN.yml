@@ -11,8 +11,8 @@ commands:
         playing: 游戏中
         waiting: 等待中
         idle: 闲置中
-      header: 房号  人数  房主  状态
-      room: <p>{id}  {size}/{options.capacity}  {host.name}  <i18n path={"commands.lobby.messages.status." + status}/></p>
+      header: 房号    名称    人数    房主    状态
+      room: <p>{id}  {options.name || '未命名'}  {size}/{options.capacity}  {host.name}  <i18n path={"commands.lobby.list.messages.status." + status}/></p>
       footer: 私聊机器人输入「lobby create」创建房间，输入「lobby join 房间号」加入房间。
   lobby.room:
     description: 查看房间
@@ -28,6 +28,7 @@ commands:
     description: 创建房间
     options:
       capacity: 最大人数
+      name: 房间名称
       private: 私密房间
       private.false: 公开房间
     messages:
@@ -36,6 +37,7 @@ commands:
     description: 房间设置
     options:
       capacity: 最大人数
+      name: 房间名称
       private: 私密房间
       private.false: 公开房间
     messages:

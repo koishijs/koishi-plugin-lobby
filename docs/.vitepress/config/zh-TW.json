@@ -2,14 +2,14 @@
   "description": "基于 Koishi 的游戏大厅服务",
   "head": [
     [
-      "連結",
+      "link",
       {
         "rel": "icon",
         "href": "https://koishi.chat/logo.png"
       }
     ],
     [
-      "連結",
+      "link",
       {
         "rel": "manifest",
         "href": "/zh-CN/manifest.json"

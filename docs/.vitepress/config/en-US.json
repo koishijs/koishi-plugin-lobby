@@ -25,22 +25,22 @@
   ],
   "themeConfig": {
     "editLink": {
-      "text": "在 GitHub 编辑此页面",
+      "text": "Translate this page on Crowdin",
       "pattern": "https://github.com/koishijs/koishi-plugin-lobby/edit/main/docs/:path"
     },
     "sidebar": {
       "/": [
         {
-          "text": "指南",
+          "text": "Developing Guide",
           "items": [
             {
-              "text": "介绍",
+              "text": "Introduction",
               "link": "/"
             }
           ]
         },
         {
-          "text": "插件",
+          "text": "Plugins",
           "items": [
             {
               "text": "剪刀石头布 (RPS)",
@@ -49,7 +49,7 @@
           ]
         },
         {
-          "text": "更多",
+          "text": "About",
           "items": [
             {
               "text": "Koishi 官网",

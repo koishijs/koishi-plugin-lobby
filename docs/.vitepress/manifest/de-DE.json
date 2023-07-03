@@ -1,0 +1,16 @@
+{
+  "name": "Koishi",
+  "short_name": "Koishi",
+  "description": "基于 Koishi 的游戏大厅服务",
+  "start_url": "/zh-CN/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#5546a3",
+  "icons": [
+    {
+      "src": "https://koishi.chat/logo.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+commands:
+  rps:
+    description: じゃん・けん・ぽん！
+    options:
+      rounds: 勝者を決める回数
+      timeout: 制限時間
+lobby.game.rps:
+  invalid-player-count: 参加者は２人でなければなりません。
+  input: |-
+    {0} 回目
+    なんの「手」を出す？
+    [R] グー
+    [P] パー
+    [S] チョキ
+  choice:
+    r: グー
+    p: パー
+    s: チョキ
+  accepted: '「{0}」を出した。相手の「手」を出すまでお待ちください。'
+  output: '{0} は「{1}」を出した'
+  timeout: '{0} は既定時間内に「手」を出しませんでした'
+  result-0: |-
+    {0}、{1}。あいこ！
+    <p>{2}</p>
+  result-1: |-
+    {0}、{1}。{2} の勝ちです！
+    <p>{3}</p>
+  score: '現在の点数は：{0}：{1} 点。{2}：{3} 点'
+  finish: ゲーム終了、{0} の勝利！

@@ -1,11 +1,11 @@
 commands:
   rps:
-    description: 石头剪刀布
+    description: Paper Scissors Stone
     options:
-      rounds: 获胜局数
-      timeout: 出招限时
+      rounds: Win Count
+      timeout: Time limit for calls
 lobby.game.rps:
-  invalid-player-count: 游戏人数必须为 2 人。
+  invalid-player-count: The number of players must be 2.
   input: |-
     第 {0} 轮
     请输入字母进行选择：

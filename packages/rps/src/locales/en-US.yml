@@ -7,23 +7,23 @@ commands:
 lobby.game.rps:
   invalid-player-count: The number of players must be 2.
   input: |-
-    第 {0} 轮
-    请输入字母进行选择：
-    [R] 石头
-    [P] 布
-    [S] 剪刀
+    Round {0}
+    Type one of the characters below:
+    [R] Stone
+    [P] Scissors
+    [S] Stone
   choice:
-    r: 石头
-    p: 布
-    s: 剪刀
-  accepted: '你选择了{0}，请等待对方出招。'
-  output: '{0} 出了{1}'
-  timeout: '{0} 没有在规定时间内出招'
+    r: Stone
+    p: Paper
+    s: Scissors
+  accepted: 'You have selected {0}, please wait for the other side.'
+  output: '{0} selected {1}'
+  timeout: '{0} timed out.'
   result-0: |-
-    {0}，{1}，此轮没有分出胜负。
+    {0} is tied with {1}.
     <p>{2}</p>
   result-1: |-
-    {0}，{1}，{2} 获胜！
+    {0}, {1}, {2} wins！
     <p>{3}</p>
-  score: '当前比分为：{0}：{1} 分；{2}：{3} 分。'
-  finish: 游戏结束，{0} 获胜！
+  score: "Current Score:\n{0}: {1} points\n{2}: {3} points"
+  finish: Game over, {0} is the winner!

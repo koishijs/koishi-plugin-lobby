@@ -1,13 +1,12 @@
 {
   "name": "koishi-plugin-lobby",
   "description": "Lobby service for Koishi",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
     "lib",
-    "dist",
-    "index.html"
+    "src"
   ],
   "author": "Shigma <shigma10826@gmail.com>",
   "license": "MIT",
@@ -44,12 +43,12 @@
     "chess"
   ],
   "peerDependencies": {
-    "koishi": "^4.12.9"
+    "koishi": "^4.15.4"
   },
   "devDependencies": {
-    "@types/node": "^18.16.9",
+    "@types/node": "^20.8.9",
     "atsc": "^1.2.2",
-    "koishi": "^4.12.9",
-    "typescript": "^5.0.4"
+    "koishi": "^4.15.4",
+    "typescript": "^5.2.2"
   }
 }

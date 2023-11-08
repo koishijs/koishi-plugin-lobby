@@ -101,7 +101,7 @@ class RPSCorridor extends Corridor {
 
   constructor(ctx: Context, public config: RPSCorridor.Config) {
     super(ctx, 'rps')
-    ctx.i18n.define('zh', require('./locales/zh-CN'))
+    ctx.i18n.define('zh-CN', require('./locales/zh-CN'))
 
     this.cmd.option('rounds', '-r <rounds:number>', { fallback: config.rounds })
     this.cmd.option('timeout', '-t <timeout:number>', { fallback: config.timeout })

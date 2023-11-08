@@ -31,7 +31,7 @@ class Lobby extends Service {
 
   constructor(public ctx: Context, public config: Lobby.Config) {
     super(ctx, 'lobby', true)
-    ctx.i18n.define('zh', require('./locales/zh-CN'))
+    ctx.i18n.define('zh-CN', require('./locales/zh-CN'))
 
     ctx.private().before('attach-user', (session, fields) => {
       fields.add('id')

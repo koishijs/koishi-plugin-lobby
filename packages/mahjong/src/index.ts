@@ -59,7 +59,7 @@ class MahjongCorridor extends Corridor {
 
   constructor(ctx: Context, public config: MahjongCorridor.Config) {
     super(ctx, 'mahjong')
-    ctx.i18n.define('zh', require('./locales/zh-CN'))
+    ctx.i18n.define('zh-CN', require('./locales/zh-CN'))
 
     this.cmd.option('timeout.mingpai', '', { fallback: config.timeout.mingpai })
     this.cmd.option('timeout.dingque', '', { fallback: config.timeout.dingque })

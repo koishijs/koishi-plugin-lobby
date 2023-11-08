@@ -10,11 +10,11 @@ jobs:
 
     steps:
       - name: Check out
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - name: Install
         run: yarn
       - name: Lint
@@ -25,11 +25,11 @@ jobs:
 
     steps:
       - name: Check out
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - name: Install
         run: yarn
       - name: Build
@@ -41,13 +41,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [14, 16, 18]
+        node-version: [16, 18, 20]
 
     steps:
       - name: Check out
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install
@@ -59,3 +59,30 @@ jobs:
         with:
           file: ./coverage/coverage-final.json
           name: codecov
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+      - name: Install
+        run: yarn
+      - name: Build
+        run: yarn docs:build
+        env:
+          MEILISEARCH_HOST: ${{ secrets.MEILISEARCH_HOST }}
+          MEILISEARCH_READ_KEY: ${{ secrets.MEILISEARCH_READ_KEY }}
+          MEILISEARCH_WRITE_KEY: ${{ secrets.MEILISEARCH_WRITE_KEY }}
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.WORKFLOW_TOKEN }}
+          external_repository: koishi-bot/lobby
+          publish_branch: pages
+          publish_dir: docs/.vitepress/dist
+          force_orphan: true
+          enable_jekyll: true
+          commit_message: '[skip ci] deploy'

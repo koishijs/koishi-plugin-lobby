@@ -10,7 +10,7 @@ export default defineConfig({
   },
 
   themeConfig: {
-    indexName: 'lobby',
+    indexName: 'koishi-lobby',
 
     socialLinks: {
       github: 'https://github.com/koishijs/koishi-plugin-lobby',

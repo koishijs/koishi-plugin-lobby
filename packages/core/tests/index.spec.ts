@@ -18,11 +18,7 @@ const client2 = app.mock.client('222')
 const client3 = app.mock.client('333')
 
 const id = jest.spyOn(Random, 'id')
-const send = app.mock.bots[0].sendPrivateMessage = jest.fn<Bot['sendPrivateMessage']>(async (userId, fragment, options) => {
-  const elements = h.normalize(fragment)
-  await options?.session?.transform(elements)
-  return []
-})
+const send = app.bots[0].sendMessage = jest.fn<Bot['sendMessage']>(async () => [])
 
 let clock: InstalledClock
 

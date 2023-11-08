@@ -2,7 +2,7 @@ import { Command, Context } from 'koishi'
 import { Game } from './game'
 
 export abstract class Corridor {
-  static using = ['lobby']
+  static inject = ['lobby']
 
   abstract factory: typeof Game<any>
 

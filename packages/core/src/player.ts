@@ -1,25 +1,23 @@
 import { Awaitable, Fragment, h, Next, Session } from 'koishi'
-import { Room } from './room'
 import { Guest } from './guest'
 
 export class Player extends Guest {
   inc: number
   name: string
-  room: Room
   player = this
   allowSpeech: boolean
   privateSpeech: boolean
 
-  constructor(session: Session<'name' | 'locale'>) {
+  constructor(session: Session<'name' | 'locales'>) {
     super(session)
     this.name = session.username
-    this.locale = session.user?.locale
+    this.locales = session.user?.locales
   }
 
   prompt<T = void>(callback: (session: Session, next: Next, done: (value: T) => void) => Awaitable<void | Fragment>, timeout: number, post = false) {
     return new Promise<T>((resolve, reject) => {
       const dispose1 = this.lobby.ctx.middleware(async (session, next) => {
-        if (session.subtype !== 'private') return next()
+        if (!session.isDirect) return next()
         if (session.userId !== this.userId || session.platform !== this.platform) return next()
         if (!post) return callback(session, next, done)
         return next((next) => callback(session, next, done))

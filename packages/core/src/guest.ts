@@ -1,16 +1,16 @@
-import { Bot, Fragment, h, Session, sleep } from 'koishi'
+import { Bot, Context, Fragment, h, Session, sleep } from 'koishi'
 import { Room } from './room'
 import Lobby from '.'
 
 export abstract class Guest {
   cid: string
-  bot: Bot
-  subtype: string
+  bot: Bot<Context>
+  isDirect: boolean
   platform: string
   userId: string
   channelId: string
   guildId: string
-  locale: string
+  locales: string[]
   lobby: Lobby
   room: Room
 
@@ -19,7 +19,7 @@ export abstract class Guest {
   constructor(session: Session) {
     this.bot = session.bot
     this.cid = session.cid
-    this.subtype = session.subtype
+    this.isDirect = session.isDirect
     this.platform = session.platform
     this.userId = session.userId
     this.channelId = session.channelId
@@ -37,16 +37,15 @@ export abstract class Guest {
   }
 
   send(content: Fragment, queued = true) {
-    const session = this.bot.session({
-      subtype: 'group',
-      type: 'message',
-      userId: this.userId,
-      channelId: this.channelId,
-      guildId: this.guildId,
-      platform: this.platform,
-      locale: this.locale,
-      elements: h.normalize(content),
-    })
+    const session = this.bot.session()
+    session.type = 'message'
+    session.userId = this.userId
+    session.channelId = this.channelId
+    session.guildId = this.guildId
+    session.platform = this.platform
+    session.locales = this.locales
+    session.elements = h.normalize(content)
+    session.isDirect = false
     if (!queued) return this._send(session)
     return this.sendTask = this.sendTask.then(async () => {
       await this._send(session)
@@ -56,8 +55,8 @@ export abstract class Guest {
 }
 
 export class GuestChannel extends Guest {
-  constructor(session: Session<never, 'locale'>) {
+  constructor(session: Session<never, 'locales'>) {
     super(session)
-    this.locale = session.channel?.locale
+    this.locales = session.channel?.locales
   }
 }

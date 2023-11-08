@@ -13,7 +13,7 @@ export class Assert {
   idle(session: Session) {
     const player = this.lobby.guests[session.cid]
     if (!player) return
-    if (player.subtype === 'private') {
+    if (player.isDirect) {
       throw new SessionError('lobby.exception.busy-1', player.room)
     } else {
       throw new SessionError('lobby.exception.busy-2', player.room)

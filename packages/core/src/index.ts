@@ -71,7 +71,7 @@ class Lobby extends Service {
       })
 
     ctx.private().command('lobby.room')
-      .userFields(['id', 'name', 'locale'])
+      .userFields(['id', 'name', 'locales'])
       .action(({ session }) => {
         const player = this.assert.busy(session)
         const output = [session.text('.overview', {
@@ -91,7 +91,7 @@ class Lobby extends Service {
       })
 
     ctx.private().command('lobby.create')
-      .userFields(['id', 'name', 'locale'])
+      .userFields(['id', 'name', 'locales'])
       .option('capacity', '-c [count:number]', { fallback: 10 })
       .option('name', '-n [name:string]')
       .option('private', '-p')
@@ -103,7 +103,7 @@ class Lobby extends Service {
       })
 
     ctx.private().command('lobby.config')
-      .userFields(['id', 'name', 'locale'])
+      .userFields(['id', 'name', 'locales'])
       .option('capacity', '-c [count:number]')
       .option('name', '-n [name:string]')
       .option('private', '-p')
@@ -115,12 +115,12 @@ class Lobby extends Service {
       })
 
     ctx.command('lobby.join <id:string>')
-      .userFields(['name', 'locale'])
-      .channelFields(['locale'])
+      .userFields(['name', 'locales'])
+      .channelFields(['locales'])
       .action(({ session }, id) => {
         this.assert.idle(session)
         const room = this.assert.room(id)
-        if (session.subtype === 'private') {
+        if (session.isDirect) {
           if (room.locked) return session.text('.locked')
           if (room.size >= (room.options.capacity || Infinity)) {
             return session.text('.full')
@@ -138,7 +138,7 @@ class Lobby extends Service {
       .userFields(['id', 'name'])
       .action(async ({ session }) => {
         const player = this.assert.busy(session) as Player
-        if (session.subtype !== 'private') {
+        if (!session.isDirect) {
           player.room.guests.delete(player)
           return
         }
@@ -220,7 +220,7 @@ class Lobby extends Service {
   }
 
   private _stripPrefix(session: Session) {
-    const content = session.parsed.content
+    const content = session.stripped.content
     for (const prefix of this._resolvePrefix(session)) {
       if (!content.startsWith(prefix)) continue
       return content.slice(prefix.length)
@@ -229,7 +229,7 @@ class Lobby extends Service {
 }
 
 namespace Lobby {
-  export const using = ['database']
+  export const inject = ['database']
 
   export interface Config {
     speech?: {

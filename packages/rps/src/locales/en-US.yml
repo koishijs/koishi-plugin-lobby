@@ -1,6 +1,6 @@
 commands:
   rps:
-    description: Paper Scissors Stone
+    description: Rock Paper Scissors
     options:
       rounds: Win Count
       timeout: Time limit for calls
@@ -9,18 +9,18 @@ lobby.game.rps:
   input: |-
     Round {0}
     Type one of the characters below:
-    [R] Stone
-    [P] Scissors
-    [S] Stone
+    [R] Rock
+    [P] Paper
+    [S] Scissors
   choice:
-    r: Stone
+    r: Rock
     p: Paper
     s: Scissors
   accepted: 'You have selected {0}, please wait for the other side.'
   output: '{0} selected {1}'
   timeout: '{0} timed out.'
   result-0: |-
-    {0} is tied with {1}.
+    {0}, {1}, and there is no outcome for this round.
     <p>{2}</p>
   result-1: |-
     {0}, {1}, {2} wins！

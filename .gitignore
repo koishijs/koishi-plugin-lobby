@@ -1,8 +1,21 @@
 lib
 dist
-temp
 cache
-external
+temp
+
+/external
+
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
 
 node_modules
 npm-debug.log

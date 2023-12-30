@@ -41,7 +41,7 @@ class Lobby extends Service {
       const player = this.guests[session.cid]
       if (!player) return next()
       let content = this._stripPrefix(session)
-      if (session.quote) content += ' ' + session.quote.content
+      if (session.quote?.content) content += ' ' + session.quote.content
       if (!content) return next()
       return session.execute({
         name: 'talk',

@@ -1,0 +1,29 @@
+commands:
+  rps:
+    description: Rock Paper Scissors
+    options:
+      rounds: Win Count
+      timeout: Time limit for calls
+lobby.game.rps:
+  invalid-player-count: The number of players must be 2.
+  input: |-
+    Round {0}
+    Type one of the characters below:
+    [R] Rock
+    [P] Paper
+    [S] Scissors
+  choice:
+    r: Rock
+    p: Paper
+    s: Scissors
+  accepted: 'You have selected {0}, please wait for the other side.'
+  output: '{0} selected {1}'
+  timeout: '{0} timed out.'
+  result-0: |-
+    {0}, {1}, and there is no outcome for this round.
+    <p>{2}</p>
+  result-1: |-
+    {0}, {1}, {2} wins！
+    <p>{3}</p>
+  score: "Current Score:\n{0}: {1} points\n{2}: {3} points"
+  finish: Game over, {0} is the winner!

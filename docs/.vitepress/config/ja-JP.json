@@ -1,0 +1,67 @@
+{
+  "description": "基于 Koishi 的游戏大厅服务",
+  "head": [
+    [
+      "link",
+      {
+        "rel": "icon",
+        "href": "https://koishi.chat/logo.png"
+      }
+    ],
+    [
+      "link",
+      {
+        "rel": "manifest",
+        "href": "/manifest/ja-JP.json"
+      }
+    ],
+    [
+      "meta",
+      {
+        "name": "theme-color",
+        "content": "#5546a3"
+      }
+    ]
+  ],
+  "themeConfig": {
+    "editLink": {
+      "text": "Crowdin でこのページを翻訳する",
+      "pattern": "https://crowdin.com/translate/koishi/:id/zhcn-ja"
+    },
+    "sidebar": {
+      "/": [
+        {
+          "text": "指南",
+          "items": [
+            {
+              "text": "介绍",
+              "link": "/"
+            }
+          ]
+        },
+        {
+          "text": "プラグイン",
+          "items": [
+            {
+              "text": "剪刀石头布 (RPS)",
+              "link": "/plugins/rps.md"
+            }
+          ]
+        },
+        {
+          "text": "さらに表示",
+          "items": [
+            {
+              "text": "Koishi 官网",
+              "link": "https://koishi.chat"
+            },
+            {
+              "text": "支持作者",
+              "link": "https://afdian.net/a/shigma"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
